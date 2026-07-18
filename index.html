@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>MARAT SULEIMANOV — EP</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Оверлей: повернуть телефон (только на portrait-мобилках) -->
+<div id="rotate-gate">
+  <div class="phone">📱</div>
+  <p>Поверни телефон<br>горизонтально</p>
+</div>
+
+<!-- Сцена (16:9), масштабируется под окно -->
+<div id="stage">
+  <div class="wall"></div>
+  <div class="grade"></div>
+  <div class="floor"></div>
+
+  <!-- Предметы на стене -->
+  <div class="prop vympel" id="vympel" title="вымпел">
+    <img src="assets/vympel.png" alt="вымпел Ударнику соцтруда" draggable="false">
+  </div>
+
+  <div class="prop chasy" id="chasy" title="часы с кукушкой">
+    <div class="cuckoo"></div>
+    <img src="assets/chasy.png" alt="часы с кукушкой" draggable="false">
+  </div>
+
+  <!-- Табуретка + телевизор -->
+  <div class="stool">
+    <div class="stool-seat"></div>
+    <div class="stool-leg l1"></div>
+    <div class="stool-leg l2"></div>
+    <div class="stool-leg l3"></div>
+  </div>
+
+  <div class="tv" id="tv">
+    <div class="tv-glow"></div>
+    <div class="screen" id="screen">
+      <canvas id="noise" width="220" height="165"></canvas>
+      <div class="chan chan-bars"></div>
+      <div class="chan chan-ep">
+        <div class="ep-title">MARAT<br>SULEIMANOV</div>
+        <div class="ep-sub">— EP —</div>
+      </div>
+      <div class="chan chan-info">
+        <div class="marq">НОВЫЙ АЛЬБОМ • 3 ПЕСНИ • СКОРО ВЕЗДЕ • ЗВОНИТЕ 8-800 • </div>
+      </div>
+      <div class="chan chan-nosig">НЕТ&nbsp;СИГНАЛА</div>
+      <div class="crt"></div>
+    </div>
+    <img class="tv-img" src="assets/tv.png" alt="телевизор Сапфир" draggable="false">
+    <div class="tv-hint" id="tv-hint">← нажми</div>
+  </div>
+
+  <!-- Панель управления -->
+  <div class="panel" id="panel">
+    <img src="assets/panel.png" alt="панель кнопок" draggable="false">
+    <button class="hot btn-ch" data-ch="1" style="--x:20%;--y:17%"></button>
+    <button class="hot btn-ch" data-ch="2" style="--x:20%;--y:30.5%"></button>
+    <button class="hot btn-ch" data-ch="3" style="--x:20%;--y:45%"></button>
+    <button class="hot btn-ch" data-ch="4" style="--x:20%;--y:61%"></button>
+    <button class="hot btn-ch" data-ch="5" style="--x:20%;--y:79%"></button>
+    <button class="hot btn-power" id="btn-power" style="--x:73%;--y:17%"></button>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
