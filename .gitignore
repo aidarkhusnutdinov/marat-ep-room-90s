@@ -1,6 +1,7 @@
 .DS_Store
-tools/venv/
-tools/src/
 __pycache__/
 *.pyc
 .gstack/
+# ** — чтобы правила ловили и подпапку v2/, а не только корень
+**/tools/venv/
+**/tools/src/
