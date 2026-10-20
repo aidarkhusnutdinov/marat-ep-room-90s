@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Новый день — комната</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Ruslan+Display&family=PT+Mono&family=Neucha&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="rotate-gate">
+  <div class="phone">📱</div>
+  <p>Поверни телефон<br>горизонтально</p>
+</div>
+
+<!-- Сцена 1600×900, масштабируется под окно целиком -->
+<div id="stage">
+  <div id="room-wrap">
+    <svg id="room" viewBox="170 10 840 760" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div id="hud">
+      <div class="hud-title">НОВЫЙ ДЕНЬ</div>
+      <div class="hud-budget">В кошельке: <b id="money">1000</b> ₽</div>
+      <div class="hud-goal" id="goal">Задача: поставить телевизор и включить клип</div>
+    </div>
+    <div id="toast"></div>
+  </div>
+
+  <aside id="shop">
+    <header>
+      <div class="shop-brand">ПОСЫЛТОРГ</div>
+      <div class="shop-sub">каталог товаров для дома · 1990</div>
+    </header>
+    <ul id="catalog"></ul>
+    <footer>
+      <button id="preset" class="big">☭ «Фанат СССР» — на все деньги</button>
+      <button id="reset" class="small">Вернуть всё и начать заново</button>
+    </footer>
+  </aside>
+
+  <!-- Телевизор крупно -->
+  <div id="tvzoom" hidden>
+    <div class="tvz-box">
+      <div class="screen" id="screen" data-ch="static">
+        <canvas id="noise" width="220" height="174"></canvas>
+        <div class="chan chan-bars"></div>
+        <div class="chan chan-ep">
+          <div class="ep-title">MARAT<br>SULEIMANOV</div>
+          <div class="ep-sub">— EP —</div>
+          <div class="ep-note">тут будет клип</div>
+          <video id="clip" playsinline hidden></video>
+        </div>
+        <div class="chan chan-nosig">НЕТ&nbsp;СИГНАЛА</div>
+        <div class="crt"></div>
+      </div>
+      <img class="tvz-img" src="assets/tv.png" alt="телевизор Сапфир 401-1" draggable="false">
+    </div>
+    <div class="tvz-help">клик по экрану — следующий канал</div>
+    <button id="tvz-close">← обратно в комнату</button>
+  </div>
+</div>
+
+<script src="items.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Новый день — комната</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Neucha&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+
+<div id="rotate-gate"><div class="phone">📱</div><p>Поверни телефон<br>горизонтально</p></div>
+
+<div id="view"></div>
+<div id="loading">Заносим мебель…</div>
+
+<!-- Верх: задача -->
+<div id="goal"><span class="gem"></span><span id="goal-text">Купи телевизор и посмотри клип</span></div>
+
+<!-- Тестовая кнопка -->
+<button id="test-all" title="Только для проверки, в игре её не будет">ТЕСТ · купить всё бесплатно</button>
+
+<!-- Пульт, как в Sims -->
+<div id="panel">
+  <div class="money"><span class="rub">₽</span><span id="money">2 000</span></div>
+  <button id="btn-buy" class="mode"><span class="ico">🛒</span>Покупки</button>
+  <button id="btn-sound" class="mode small" title="Звук">🔊</button>
+</div>
+
+<!-- Каталог плиткой -->
+<div id="tray" hidden>
+  <nav id="cats"></nav>
+  <div id="tiles"></div>
+  <div class="tray-side">
+    <button id="preset">Готовая комната<br><b>«Фанат СССР»</b></button>
+    <button id="reset">Продать всё</button>
+    <button id="tray-close">✕</button>
+  </div>
+</div>
+<div id="card" hidden></div>
+
+<!-- Круговое меню -->
+<div id="pie" hidden></div>
+<div id="toast"></div>
+
+<!-- Телевизор крупно -->
+<div id="tvzoom" hidden>
+  <div class="tvz-box">
+    <div class="screen" id="screen" data-ch="static">
+      <canvas id="noise" width="220" height="174"></canvas>
+      <div class="chan chan-bars"></div>
+      <div class="chan chan-ep">
+        <div class="ep-title">MARAT<br>SULEIMANOV</div>
+        <div class="ep-sub">— EP —</div>
+        <div class="ep-note">тут будет клип</div>
+        <video id="clip" playsinline hidden></video>
+      </div>
+      <div class="chan chan-nosig">НЕТ&nbsp;СИГНАЛА</div>
+      <div class="crt"></div>
+    </div>
+    <img class="tvz-img" src="assets/tv.png" alt="телевизор Сапфир 401-1" draggable="false">
+  </div>
+  <div class="tvz-help">клик по экрану — следующий канал</div>
+  <button id="tvz-close">← обратно в комнату</button>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
