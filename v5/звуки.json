@@ -1,0 +1,658 @@
+﻿{
+ "_": "Список для sfx-hunter (!Неважные/Звуки с Freesound). q — запрос или несколько, max — секунд после обрезки.",
+ "click": {
+  "q": [
+   "button click",
+   "switch click",
+   "bakelite"
+  ],
+  "max": 0.3,
+  "note": "интерфейс: вкладки, кнопки, выбор предмета"
+ },
+ "coins": {
+  "q": [
+   "abacus",
+   "coins",
+   "cash register"
+  ],
+  "max": 1.5,
+  "note": "покупка/продажа — счёты?"
+ },
+ "sad": {
+  "q": [
+   "sigh",
+   "sad trombone",
+   "disappointed"
+  ],
+  "max": 1.5,
+  "note": "не хватает денег"
+ },
+ "thunk": {
+  "q": [
+   "furniture drop",
+   "wood thud",
+   "box drop"
+  ],
+  "max": 1,
+  "note": "поставили мебель"
+ },
+ "rimshot": {
+  "q": [
+   "rimshot",
+   "ba dum tss"
+  ],
+  "max": 2,
+  "note": "вымпел"
+ },
+ "bloop": {
+  "q": [
+   "bubbles",
+   "blub",
+   "porcelain"
+  ],
+  "max": 1.5,
+  "note": "кобальтовая рыбка"
+ },
+ "dzyn": {
+  "q": [
+   "spoon glass",
+   "teaspoon",
+   "cup clink"
+  ],
+  "max": 1.5,
+  "note": "чашка"
+ },
+ "thump": {
+  "q": [
+   "carpet beating",
+   "rug beat",
+   "pillow hit"
+  ],
+  "max": 2,
+  "note": "выбить ковёр"
+ },
+ "rug": {
+  "q": [
+   "rug",
+   "cloth shake",
+   "fabric"
+  ],
+  "max": 1,
+  "note": "ковёр на полу"
+ },
+ "ahem": {
+  "q": [
+   "ahem",
+   "throat clear",
+   "cough"
+  ],
+  "max": 1.2,
+  "note": "бюст перед цитатой"
+ },
+ "page": {
+  "q": [
+   "book page turn",
+   "old paper page flip"
+  ],
+  "max": 1.5,
+  "note": "ПСС"
+ },
+ "creak": {
+  "q": [
+   "chair creak",
+   "armchair",
+   "wood creak"
+  ],
+  "max": 2,
+  "note": "кресло"
+ },
+ "boing": {
+  "q": [
+   "sofa",
+   "bed springs",
+   "spring boing"
+  ],
+  "max": 2,
+  "note": "диван"
+ },
+ "knock": {
+  "q": [
+   "knock wood",
+   "table knock",
+   "knuckle"
+  ],
+  "max": 1,
+  "note": "стол"
+ },
+ "lamp": {
+  "q": [
+   "pull cord",
+   "lamp switch",
+   "light switch"
+  ],
+  "max": 0.6,
+  "note": "торшер"
+ },
+ "door": {
+  "q": [
+   "cabinet door",
+   "drawer",
+   "wardrobe"
+  ],
+  "max": 1.5,
+  "note": "тумба, стенка"
+ },
+ "flap": {
+  "q": [
+   "flag",
+   "flag wind",
+   "cloth flutter"
+  ],
+  "max": 2.5,
+  "note": "флажки"
+ },
+ "cuckoo": {
+  "q": [
+   "cuckoo clock",
+   "cuckoo"
+  ],
+  "max": 3.5,
+  "note": "часы"
+ },
+ "tick": {
+  "q": [
+   "clock tick",
+   "tick"
+  ],
+  "max": 0.5,
+  "note": "тиканье раз в секунду"
+ },
+ "radio": {
+  "q": [
+   "radio tuning",
+   "radio static",
+   "shortwave"
+  ],
+  "max": 2.5,
+  "note": "радиола включилась"
+ },
+ "tvon": {
+  "q": [
+   "crt",
+   "tv on",
+   "television"
+  ],
+  "max": 2.5,
+  "note": "открыли телевизор"
+ },
+ "tvknob": {
+  "q": [
+   "rotary switch",
+   "knob click",
+   "dial"
+  ],
+  "max": 0.6,
+  "note": "переключение канала"
+ },
+ "static": {
+  "q": [
+   "tv static",
+   "white noise static"
+  ],
+  "max": 4,
+  "loop": true,
+  "note": "помехи (петля)"
+ },
+ "beep": {
+  "q": [
+   "test tone",
+   "1khz",
+   "beep sine"
+  ],
+  "max": 1,
+  "note": "настроечная таблица"
+ },
+ "ambience": {
+  "q": [
+   "courtyard",
+   "playground ambience",
+   "yard birds"
+  ],
+  "max": 25,
+  "loop": true,
+  "level": -30,
+  "note": "фон за окном вместо птиц (петля)"
+ },
+ "water": {
+  "q": [
+   "watering can",
+   "pouring water",
+   "water pour plant"
+  ],
+  "max": 2,
+  "note": "полив бегонии"
+ },
+ "sit": {
+  "q": [
+   "sit armchair",
+   "couch springs",
+   "sofa sit down"
+  ],
+  "max": 1.6,
+  "note": "кресло: вздох пружин под весом"
+ },
+ "sip": {
+  "q": [
+   "slurp",
+   "sip",
+   "drinking tea"
+  ],
+  "max": 1.2,
+  "note": "кружка: прихлёб после дзыня"
+ },
+ "meow1": {
+  "q": [
+   "cat meow"
+  ],
+  "max": 1.5,
+  "note": "Добрая"
+ },
+ "meow2": {
+  "q": [
+   "kitten meow",
+   "kitten"
+  ],
+  "max": 1.5,
+  "note": "Мачка"
+ },
+ "meow3": {
+  "q": [
+   "cat meow angry",
+   "cat yowl",
+   "cat chirp"
+  ],
+  "max": 1.5,
+  "note": "Сглаз"
+ },
+ "woof": {
+  "q": [
+   "dog bark",
+   "woof"
+  ],
+  "max": 1,
+  "note": "Матвей"
+ },
+ "fart": {
+  "q": [
+   "fart",
+   "flatulence"
+  ],
+  "max": 1.5,
+  "note": "Матвей пукнул"
+ },
+ "turtle": {
+  "q": [
+   "leaves rustle",
+   "rustle",
+   "shuffle"
+  ],
+  "max": 1.5,
+  "note": "черепаха Чирик"
+ },
+ "spider": {
+  "q": [
+   "skitter",
+   "scuttle",
+   "insect crawl"
+  ],
+  "max": 1,
+  "note": "Тарантиныч"
+ },
+ "beaver": {
+  "q": [
+   "gnawing wood",
+   "beaver",
+   "chewing wood"
+  ],
+  "max": 1.5,
+  "note": "бобёр Михалыч"
+ },
+ "munch": {
+  "q": [
+   "eating crunch",
+   "munch",
+   "crunch"
+  ],
+  "max": 1.5,
+  "note": "покормить питомца"
+ },
+ "croc": {
+  "q": [
+   "jaw snap",
+   "bite snap",
+   "crocodile"
+  ],
+  "max": 1.2,
+  "note": "Мистер Кро: пасть"
+ },
+ "cdtray": {
+  "q": [
+   "cd tray",
+   "cd player",
+   "cassette button"
+  ],
+  "max": 1.5,
+  "note": "музцентр включили"
+ },
+ "modem": {
+  "q": [
+   "dial up modem",
+   "modem"
+  ],
+  "max": 4,
+  "note": "пентиум: заставка"
+ },
+ "boot": {
+  "q": [
+   "computer startup",
+   "startup chime",
+   "pc boot"
+  ],
+  "max": 3,
+  "note": "пентиум: рабочий стол"
+ },
+ "skate": {
+  "q": [
+   "skateboard",
+   "skateboard roll",
+   "skateboard ollie"
+  ],
+  "max": 2,
+  "note": "скейт и скейтер за окном"
+ },
+ "plane": {
+  "q": [
+   "propeller plane",
+   "airplane flyby",
+   "plane flyby"
+  ],
+  "max": 6,
+  "note": "самолёт с Маратом"
+ },
+ "spray": {
+  "q": [
+   "spray can",
+   "aerosol spray",
+   "spray paint"
+  ],
+  "max": 1.5,
+  "note": "граффити баллончиком"
+ },
+ "chalk": {
+  "q": [
+   "chalk",
+   "chalkboard writing",
+   "chalk writing"
+  ],
+  "max": 1.5,
+  "note": "бармалей мелом"
+ },
+ "deal": {
+  "q": [
+   "success chime",
+   "positive ding",
+   "bell ding"
+  ],
+  "max": 1.2,
+  "note": "торг: скинули цену"
+ },
+ "huff": {
+  "q": [
+   "hmph",
+   "annoyed grunt",
+   "huff"
+  ],
+  "max": 1.2,
+  "note": "торг: обиделся"
+ },
+ "right": {
+  "q": [
+   "correct answer",
+   "quiz correct",
+   "win chime"
+  ],
+  "max": 1.5,
+  "note": "викторина: верно"
+ },
+ "wrong": {
+  "q": [
+   "wrong answer",
+   "buzzer",
+   "error buzz"
+  ],
+  "max": 1.2,
+  "note": "викторина: неверно"
+ },
+ "share": {
+  "q": [
+   "whoosh",
+   "swoosh"
+  ],
+  "max": 1,
+  "note": "поделиться"
+ },
+ "safe": {
+  "q": [
+   "safe dial",
+   "combination lock",
+   "safe lock"
+  ],
+  "max": 1.5,
+  "note": "сейф"
+ },
+ "brain": {
+  "q": [
+   "computer beeps",
+   "data processing",
+   "retro computer"
+  ],
+  "max": 2,
+  "note": "Вечный мозг"
+ },
+ "box": {
+  "q": [
+   "music box",
+   "jewelry box",
+   "small box open"
+  ],
+  "max": 3,
+  "note": "шкатулка"
+ },
+ "porcelain": {
+  "q": [
+   "porcelain clink",
+   "ceramic clink",
+   "china clink"
+  ],
+  "max": 1,
+  "note": "слоники"
+ },
+ "beanbag": {
+  "q": [
+   "beanbag",
+   "bean bag",
+   "cushion sit"
+  ],
+  "max": 1.5,
+  "note": "пуфик"
+ },
+ "sparkle": {
+  "q": [
+   "sparkle",
+   "magic chime",
+   "shimmer"
+  ],
+  "max": 1.5,
+  "note": "золото: рубль, аудиосистема"
+ },
+ "metal": {
+  "q": [
+   "metal bar hit",
+   "pipe clang",
+   "metal clank"
+  ],
+  "max": 1,
+  "note": "шведская стенка, чугунная батарея"
+ },
+ "amb_city": {
+  "q": [
+   "city street ambience",
+   "traffic distant",
+   "street ambience"
+  ],
+  "max": 25,
+  "loop": true,
+  "level": -30,
+  "note": "голая стена: хрущёвка напротив, улица"
+ },
+ "amb_fire": {
+  "q": [
+   "fire crackling",
+   "bonfire",
+   "campfire"
+  ],
+  "max": 25,
+  "loop": true,
+  "level": -30,
+  "note": "окно: пожар революции"
+ },
+ "amb_square": {
+  "q": [
+   "crowd square",
+   "church bells distant",
+   "crowd ambience"
+  ],
+  "max": 25,
+  "loop": true,
+  "level": -30,
+  "note": "окно: Мавзолей, Красная площадь"
+ },
+ "amb_parade": {
+  "q": [
+   "marching drum",
+   "marching band",
+   "parade"
+  ],
+  "max": 25,
+  "loop": true,
+  "level": -30,
+  "note": "окно: парад пионеров"
+ },
+ "amb_skate": {
+  "q": [
+   "skatepark",
+   "skateboarding",
+   "skate park"
+  ],
+  "max": 25,
+  "loop": true,
+  "level": -30,
+  "note": "окно: скейт-парк"
+ },
+ "amb_garages": {
+  "q": [
+   "dog barking distant",
+   "suburb ambience",
+   "garage ambience"
+  ],
+  "max": 25,
+  "loop": true,
+  "level": -30,
+  "note": "окно: гаражи"
+ },
+ "amb_beach": {
+  "q": [
+   "ocean waves",
+   "sea waves beach",
+   "seagulls"
+  ],
+  "max": 25,
+  "loop": true,
+  "level": -30,
+  "note": "окно: пляж"
+ },
+ "amb_forest": {
+  "q": [
+   "pine forest wind",
+   "forest birds",
+   "forest ambience"
+  ],
+  "max": 25,
+  "loop": true,
+  "level": -30,
+  "note": "окно: Боровое"
+ },
+ "feed_dog": {
+  "q": [
+   "dog eating",
+   "dog food bowl",
+   "kibble"
+  ],
+  "max": 2,
+  "note": "Матвей ест"
+ },
+ "feed_turtle": {
+  "q": [
+   "lettuce crunch",
+   "eating lettuce",
+   "chewing salad"
+  ],
+  "max": 1.5,
+  "note": "Чирик жуёт салат"
+ },
+ "feed_spider": {
+  "q": [
+   "cricket chirp",
+   "cricket insect",
+   "cricket"
+  ],
+  "max": 1.5,
+  "note": "тарантулу дали сверчка"
+ },
+ "beaver_pet": {
+  "q": [
+   "guinea pig squeak",
+   "rodent squeak",
+   "squeak animal"
+  ],
+  "max": 1.2,
+  "note": "Михалыча погладили — пищит"
+ },
+ "growl": {
+  "q": [
+   "crocodile growl",
+   "alligator hiss",
+   "monster growl"
+  ],
+  "max": 2,
+  "note": "Мистер Кро разевает пасть и рычит"
+ },
+ "bugle": {
+  "q": [
+   "bugle call",
+   "bugle",
+   "trumpet fanfare"
+  ],
+  "max": 3,
+  "note": "пионеры: горн, изредка"
+ },
+ "hurrah": {
+  "q": [
+   "crowd cheer hooray",
+   "crowd cheering",
+   "hurray"
+  ],
+  "max": 2.5,
+  "note": "пионеры: «Ура!»"
+ }
+}

@@ -1,0 +1,722 @@
+{
+ "click": {
+  "file": "click/4.mp3",
+  "dur": 0.05,
+  "orig": 0.34,
+  "title": "Switch-072",
+  "author": "Moulaythami",
+  "url": "https://freesound.org/people/Moulaythami/sounds/842462/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 4
+ },
+ "coins": {
+  "file": "coins/2.mp3",
+  "dur": 0.58,
+  "orig": 0.91,
+  "title": "Coins31.wav",
+  "author": "doudar41",
+  "url": "https://freesound.org/people/doudar41/sounds/573371/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 2
+ },
+ "sad": {
+  "file": "sad/3.mp3",
+  "dur": 0.36,
+  "orig": 0.6,
+  "title": "Oh-disappointed.wav",
+  "author": "esperar",
+  "url": "https://freesound.org/people/esperar/sounds/170765/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 3
+ },
+ "thunk": {
+  "file": "thunk/2.mp3",
+  "dur": 0.37,
+  "orig": 0.39,
+  "title": "thud pint glass beer down on table wood knock door Vows.flac",
+  "author": "kyles",
+  "url": "https://freesound.org/people/kyles/sounds/454222/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 2
+ },
+ "rimshot": {
+  "file": "rimshot/2.mp3",
+  "dur": 1.84,
+  "orig": 3.0,
+  "title": "Musical, Percussion, Drums, Ba-Dum-Tss",
+  "author": "Vein_Adams",
+  "url": "https://freesound.org/people/Vein_Adams/sounds/713649/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 2
+ },
+ "bloop": {
+  "file": "bloop/1.mp3",
+  "dur": 1.5,
+  "orig": 2.04,
+  "title": "Bubbles Light Short Descend.wav",
+  "author": "murraysortz",
+  "url": "https://freesound.org/people/murraysortz/sounds/192496/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "dzyn": {
+  "file": "dzyn/5.mp3",
+  "dur": 0.14,
+  "orig": 0.2,
+  "title": "spoon_glass.wav",
+  "author": "estupe",
+  "url": "https://freesound.org/people/estupe/sounds/186348/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 5
+ },
+ "thump": {
+  "file": "thump/1.mp3",
+  "dur": 2.0,
+  "orig": 25.0,
+  "title": "Beating Carpet Rug Cleaning Hard Pack.wav",
+  "author": "ralph.whitehead",
+  "url": "https://freesound.org/people/ralph.whitehead/sounds/565701/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "rug": {
+  "file": "rug/5.mp3",
+  "dur": 0.31,
+  "orig": 0.84,
+  "title": "Canvas Dropcloth Snap 1",
+  "author": "zembacraftworks",
+  "url": "https://freesound.org/people/zembacraftworks/sounds/428337/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 5
+ },
+ "ahem": {
+  "file": "ahem/1.mp3",
+  "dur": 0.49,
+  "orig": 0.49,
+  "title": "Ahem 1",
+  "author": "DrFortyseven",
+  "url": "https://freesound.org/people/DrFortyseven/sounds/436107/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "page": {
+  "file": "page/1.mp3",
+  "dur": 1.01,
+  "orig": 2.11,
+  "title": "Page Turn - 31",
+  "author": "SpaceJoe",
+  "url": "https://freesound.org/people/SpaceJoe/sounds/484951/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "creak": {
+  "file": "creak/5.mp3",
+  "dur": 1.77,
+  "orig": 1.77,
+  "title": "creaking_armchair_2.wav",
+  "author": "104-Moonj",
+  "url": "https://freesound.org/people/104-Moonj/sounds/687265/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 5
+ },
+ "boing": {
+  "file": "boing/1.mp3",
+  "dur": 1.1,
+  "orig": 2.96,
+  "title": "sofa 8",
+  "author": "Fedor_Ogon",
+  "url": "https://freesound.org/people/Fedor_Ogon/sounds/809862/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "knock": {
+  "file": "knock/1.mp3",
+  "dur": 1.0,
+  "orig": 1.5,
+  "title": "Knocking on wood.wav",
+  "author": "Elandre01",
+  "url": "https://freesound.org/people/Elandre01/sounds/594389/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "lamp": {
+  "file": "lamp/1.mp3",
+  "dur": 0.27,
+  "orig": 0.36,
+  "title": "Cord String Pull 2.wav",
+  "author": "killianm97",
+  "url": "https://freesound.org/people/killianm97/sounds/554235/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "door": {
+  "file": "door/2.mp3",
+  "dur": 1.5,
+  "orig": 1.79,
+  "title": "Rolling Drawer 07",
+  "author": "inner_most_garden",
+  "url": "https://freesound.org/people/inner_most_garden/sounds/806837/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 2
+ },
+ "flap": {
+  "file": "flap/2.mp3",
+  "dur": 0.25,
+  "orig": 0.46,
+  "title": "Wing Flap (Flag Flapping) 6a",
+  "author": "ani_music",
+  "url": "https://freesound.org/people/ani_music/sounds/244981/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 2
+ },
+ "cuckoo": {
+  "file": "cuckoo/1.mp3",
+  "dur": 3.5,
+  "orig": 3.78,
+  "title": "G4_cuckoo in clock.mp3",
+  "author": "Iamgiorgio",
+  "url": "https://freesound.org/people/Iamgiorgio/sounds/371784/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "tick": {
+  "file": "tick/1.mp3",
+  "dur": 0.04,
+  "orig": 0.48,
+  "title": "clock-tick-01.flac",
+  "author": "pbimal",
+  "url": "https://freesound.org/people/pbimal/sounds/534094/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "radio": {
+  "file": "radio/1.mp3",
+  "dur": 2.5,
+  "orig": 2.89,
+  "title": "COMRadio_Static AM Transmission",
+  "author": "harrisonlace",
+  "url": "https://freesound.org/people/harrisonlace/sounds/812929/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "tvon": {
+  "file": "tvon/2.mp3",
+  "dur": 2.5,
+  "orig": 11.02,
+  "title": "CRT TV Switches On",
+  "author": "Fission9",
+  "url": "https://freesound.org/people/Fission9/sounds/693860/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 2
+ },
+ "tvknob": {
+  "file": "tvknob/1.mp3",
+  "dur": 0.46,
+  "orig": 0.82,
+  "title": "Switch Klunk 1",
+  "author": "cookies+policy",
+  "url": "https://freesound.org/people/cookies+policy/sounds/556633/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "static": {
+  "file": "static/5.mp3",
+  "dur": 4.0,
+  "orig": 4.27,
+  "title": "TV Static Sound by KLEBER KGF",
+  "author": "Kleber_KGF",
+  "url": "https://freesound.org/people/Kleber_KGF/sounds/354019/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 5
+ },
+ "beep": {
+  "file": "beep/1.mp3",
+  "dur": 0.9,
+  "orig": 0.9,
+  "title": "Radio tone",
+  "author": "SamsterBirdies",
+  "url": "https://freesound.org/people/SamsterBirdies/sounds/561345/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "ambience": {
+  "file": "ambience/1.mp3",
+  "dur": 25.0,
+  "orig": 27.42,
+  "title": "kids playing soccer in front of opera or courtyard +distant traffic Marseille, France1 MS.wav",
+  "author": "kyles",
+  "url": "https://freesound.org/people/kyles/sounds/451031/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "water": {
+  "file": "water/4.mp3",
+  "dur": 1.76,
+  "orig": 2.5,
+  "title": "Water pouring; quick_1-2.aif",
+  "author": "domrodrig",
+  "url": "https://freesound.org/people/domrodrig/sounds/119113/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 4
+ },
+ "sit": {
+  "file": "sit/1.mp3",
+  "dur": 0.77,
+  "orig": 1.1,
+  "title": "04_Sillón_rechinando.wav",
+  "author": "JoseAgudelo",
+  "url": "https://freesound.org/people/JoseAgudelo/sounds/472373/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "sip": {
+  "file": "sip/1.mp3",
+  "dur": 0.8,
+  "orig": 1.03,
+  "title": "coffee slurp 6",
+  "author": "benkenart",
+  "url": "https://freesound.org/people/benkenart/sounds/568042/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "meow1": {
+  "file": "meow1/1.mp3",
+  "dur": 0.48,
+  "orig": 0.68,
+  "title": "Senior Cat Meow",
+  "author": "Lukey1028",
+  "url": "https://freesound.org/people/Lukey1028/sounds/732519/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "meow2": {
+  "file": "meow2/1.mp3",
+  "dur": 0.53,
+  "orig": 0.6,
+  "title": "Cute Kitten Meow",
+  "author": "Breviceps",
+  "url": "https://freesound.org/people/Breviceps/sounds/448084/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "meow3": {
+  "file": "meow3/1.mp3",
+  "dur": 0.41,
+  "orig": 0.73,
+  "title": "Cat Call (Meow)",
+  "author": "Jofae",
+  "url": "https://freesound.org/people/Jofae/sounds/362953/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "woof": {
+  "file": "woof/2.mp3",
+  "dur": 0.83,
+  "orig": 1.02,
+  "title": "WoofBig2.wav",
+  "author": "Wdomino",
+  "url": "https://freesound.org/people/Wdomino/sounds/517132/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 2
+ },
+ "fart": {
+  "file": "fart/1.mp3",
+  "dur": 1.5,
+  "orig": 1.97,
+  "title": "Fart #005",
+  "author": "bassimat",
+  "url": "https://freesound.org/people/bassimat/sounds/840755/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "turtle": {
+  "file": "turtle/4.mp3",
+  "dur": 1.5,
+  "orig": 2.03,
+  "title": "LeavesRustling07",
+  "author": "falcospizaetus",
+  "url": "https://freesound.org/people/falcospizaetus/sounds/489931/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 4
+ },
+ "spider": {
+  "file": "spider/2.mp3",
+  "dur": 1.0,
+  "orig": 1.35,
+  "title": "Spider_Scuttle.wav",
+  "author": "KL_Falcon",
+  "url": "https://freesound.org/people/KL_Falcon/sounds/580511/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 2
+ },
+ "beaver": {
+  "file": "beaver/1.mp3",
+  "dur": 1.5,
+  "orig": 29.47,
+  "title": "rat_gnawing_its_way_down_through_our_wooden_ceiling.wav",
+  "author": "ulla_petersen",
+  "url": "https://freesound.org/people/ulla_petersen/sounds/333094/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "munch": {
+  "file": "munch/2.mp3",
+  "dur": 0.96,
+  "orig": 1.2,
+  "title": "Biting Corn Chip, Chewing 05",
+  "author": "HECKFRICKER",
+  "url": "https://freesound.org/people/HECKFRICKER/sounds/753316/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 2
+ },
+ "croc": {
+  "file": "croc/1.mp3",
+  "dur": 0.06,
+  "orig": 0.38,
+  "title": "jawsingle1.wav",
+  "author": "EcoDTR",
+  "url": "https://freesound.org/people/EcoDTR/sounds/27475/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "cdtray": {
+  "file": "cdtray/1.mp3",
+  "dur": 1.3,
+  "orig": 1.44,
+  "title": "Disc drive open",
+  "author": "sed4906",
+  "url": "https://freesound.org/people/sed4906/sounds/556487/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "modem": {
+  "file": "modem/3.mp3",
+  "dur": 4.0,
+  "orig": 5.63,
+  "title": "modem1200.wav",
+  "author": "guitarguy1985",
+  "url": "https://freesound.org/people/guitarguy1985/sounds/78657/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 3
+ },
+ "boot": {
+  "file": "boot/1.mp3",
+  "dur": 0.98,
+  "orig": 1.14,
+  "title": "Fake Windows 1.0 Startup",
+  "author": "RJr2009",
+  "url": "https://freesound.org/people/RJr2009/sounds/699707/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "skate": {
+  "file": "skate/2.mp3",
+  "dur": 2.0,
+  "orig": 2.58,
+  "title": "skateboard rolling.wav",
+  "author": "rabbydaw",
+  "url": "https://freesound.org/people/rabbydaw/sounds/504879/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 2
+ },
+ "plane": {
+  "file": "plane/1.mp3",
+  "dur": 4.0,
+  "orig": 4.0,
+  "title": "75 Hz Flying Plane Sound Loop.flac",
+  "author": "TheRandomSoundByte2637",
+  "url": "https://freesound.org/people/TheRandomSoundByte2637/sounds/607776/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "spray": {
+  "file": "spray/2.mp3",
+  "dur": 1.5,
+  "orig": 1.62,
+  "title": "aerosol can single spray 2",
+  "author": "FOSSarts",
+  "url": "https://freesound.org/people/FOSSarts/sounds/741079/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 2
+ },
+ "chalk": {
+  "file": "chalk/3.mp3",
+  "dur": 0.47,
+  "orig": 0.48,
+  "title": "Write/Draw with chalk on board",
+  "author": "Breviceps",
+  "url": "https://freesound.org/people/Breviceps/sounds/447925/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 3
+ },
+ "deal": {
+  "file": "deal/4.mp3",
+  "dur": 0.8,
+  "orig": 0.81,
+  "title": "victory chime",
+  "author": "1bob",
+  "url": "https://freesound.org/people/1bob/sounds/717771/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 4
+ },
+ "huff": {
+  "file": "huff/3.mp3",
+  "dur": 0.54,
+  "orig": 1.7,
+  "title": "Huff 1",
+  "author": "_stubb",
+  "url": "https://freesound.org/people/_stubb/sounds/389652/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 3
+ },
+ "right": {
+  "file": "right/1.mp3",
+  "dur": 1.14,
+  "orig": 2.0,
+  "title": "Quiz Gameshow Correct Ping 16..mp3",
+  "author": "craigscottuk",
+  "url": "https://freesound.org/people/craigscottuk/sounds/644952/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "wrong": {
+  "file": "wrong/4.mp3",
+  "dur": 0.28,
+  "orig": 0.28,
+  "title": "Wrong Answer Buzzer",
+  "author": "-Andreas",
+  "url": "https://freesound.org/people/-Andreas/sounds/650842/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 4
+ },
+ "share": {
+  "file": "share/1.mp3",
+  "dur": 0.48,
+  "orig": 0.52,
+  "title": "13th Whoosh Swing Sound",
+  "author": "qubodup",
+  "url": "https://freesound.org/people/qubodup/sounds/60000/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "safe": {
+  "file": "safe/1.mp3",
+  "dur": 1.21,
+  "orig": 1.97,
+  "title": "Bank Vault Combination Lock Sound - V6",
+  "author": "Pixeliota",
+  "url": "https://freesound.org/people/Pixeliota/sounds/678254/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "brain": {
+  "file": "brain/1.mp3",
+  "dur": 0.68,
+  "orig": 1.0,
+  "title": "Laptop beeps",
+  "author": "EGYT5453",
+  "url": "https://freesound.org/people/EGYT5453/sounds/697494/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "box": {
+  "file": "box/1.mp3",
+  "dur": 1.85,
+  "orig": 2.6,
+  "title": "music box - wind up 03.wav",
+  "author": "Anthousai",
+  "url": "https://freesound.org/people/Anthousai/sounds/336606/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "porcelain": {
+  "file": "porcelain/2.mp3",
+  "dur": 0.58,
+  "orig": 0.92,
+  "title": "ceramicCups3.wav",
+  "author": "kikuchiyo",
+  "url": "https://freesound.org/people/kikuchiyo/sounds/214191/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 2
+ },
+ "beanbag": {
+  "file": "beanbag/3.mp3",
+  "dur": 1.5,
+  "orig": 16.14,
+  "title": "Sitting on a couch",
+  "author": "mk-la",
+  "url": "https://freesound.org/people/mk-la/sounds/746443/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 3
+ },
+ "sparkle": {
+  "file": "sparkle/4.mp3",
+  "dur": 0.36,
+  "orig": 0.57,
+  "title": "Item Sparkle",
+  "author": "Mr._Fritz_",
+  "url": "https://freesound.org/people/Mr._Fritz_/sounds/545238/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 4
+ },
+ "metal": {
+  "file": "metal/1.mp3",
+  "dur": 0.88,
+  "orig": 0.93,
+  "title": "hitting a metal bar",
+  "author": "MYSSYF",
+  "url": "https://freesound.org/people/MYSSYF/sounds/533080/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "amb_city": {
+  "file": "amb_city/1.mp3",
+  "dur": 25.0,
+  "orig": 36.53,
+  "title": "City Ambience with distant church bells",
+  "author": "florianreichelt",
+  "url": "https://freesound.org/people/florianreichelt/sounds/451731/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "amb_fire": {
+  "file": "amb_fire/4.mp3",
+  "dur": 18.08,
+  "orig": 18.08,
+  "title": "fire_crackling_2.wav",
+  "author": "Keleti",
+  "url": "https://freesound.org/people/Keleti/sounds/510762/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 4
+ },
+ "amb_square": {
+  "file": "amb_square/1.mp3",
+  "dur": 25.0,
+  "orig": 28.14,
+  "title": "mob noice city central square.wav",
+  "author": "Vital_Sounds",
+  "url": "https://freesound.org/people/Vital_Sounds/sounds/534481/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "amb_parade": {
+  "file": "amb_parade/1.mp3",
+  "dur": 16.02,
+  "orig": 16.02,
+  "title": "Marching band drumming in parade",
+  "author": "SoundsAreGr8",
+  "url": "https://freesound.org/people/SoundsAreGr8/sounds/340936/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "amb_skate": {
+  "file": "amb_skate/3.mp3",
+  "dur": 25.0,
+  "orig": 32.76,
+  "title": "calvachi_sandra_baja_fidelidad_parque san ignacio_pasto_skates.wav",
+  "author": "artesmediales",
+  "url": "https://freesound.org/people/artesmediales/sounds/416557/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 3
+ },
+ "amb_garages": {
+  "file": "amb_garages/4.mp3",
+  "dur": 15.57,
+  "orig": 15.57,
+  "title": "Distant Dogs",
+  "author": "IENBA",
+  "url": "https://freesound.org/people/IENBA/sounds/820267/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 4
+ },
+ "amb_beach": {
+  "file": "amb_beach/2.mp3",
+  "dur": 25.0,
+  "orig": 25.24,
+  "title": "SeaShore Wave 2",
+  "author": "garandM1",
+  "url": "https://freesound.org/people/garandM1/sounds/799249/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 2
+ },
+ "amb_forest": {
+  "file": "amb_forest/2.mp3",
+  "dur": 25.0,
+  "orig": 34.62,
+  "title": "forest-bird (1).WAV",
+  "author": "sama66",
+  "url": "https://freesound.org/people/sama66/sounds/462137/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 2
+ },
+ "feed_dog": {
+  "file": "feed_dog/2.mp3",
+  "dur": 0.24,
+  "orig": 2.0,
+  "title": "dog food in metal bowl",
+  "author": "getwecked",
+  "url": "https://freesound.org/people/getwecked/sounds/764656/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 2
+ },
+ "feed_turtle": {
+  "file": "feed_turtle/5.mp3",
+  "dur": 0.8,
+  "orig": 1.16,
+  "title": "Lettuce",
+  "author": "d.n.audio.uk",
+  "url": "https://freesound.org/people/d.n.audio.uk/sounds/412531/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 5
+ },
+ "feed_spider": {
+  "file": "feed_spider/2.mp3",
+  "dur": 1.5,
+  "orig": 1.64,
+  "title": "cricket",
+  "author": "CoolDudefromthe90s",
+  "url": "https://freesound.org/people/CoolDudefromthe90s/sounds/709038/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 2
+ },
+ "beaver_pet": {
+  "file": "beaver_pet/1.mp3",
+  "dur": 1.03,
+  "orig": 1.55,
+  "title": "Guineapig",
+  "author": "RICHERlandTV",
+  "url": "https://freesound.org/people/RICHERlandTV/sounds/435748/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "growl": {
+  "file": "growl/1.mp3",
+  "dur": 2.0,
+  "orig": 3.79,
+  "title": "CrocodilianTypeGrowl",
+  "author": "Ovkovko",
+  "url": "https://freesound.org/people/Ovkovko/sounds/825609/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 1
+ },
+ "bugle": {
+  "file": "bugle/3.mp3",
+  "dur": 2.52,
+  "orig": 4.06,
+  "title": "Clean and Pompous Fanfare Trumpet.mp3",
+  "author": "joepayne",
+  "url": "https://freesound.org/people/joepayne/sounds/413203/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 3
+ },
+ "hurrah": {
+  "file": "hurrah/2.mp3",
+  "dur": 2.5,
+  "orig": 3.38,
+  "title": "BerlinGameScene.com Crowd Cheer 1",
+  "author": "BerlinGameScene",
+  "url": "https://freesound.org/people/BerlinGameScene/sounds/267249/",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "n": 2
+ }
+}
