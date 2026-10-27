@@ -5,6 +5,7 @@
 import * as THREE from "three";
 import { M, mesh, rbox, box, cyl, photoPlane, rugWave } from "./kit.js";
 import { normalMap } from "../textures.js";
+import { buildCroc } from "./croc.js";
 
 const std = o => new THREE.MeshStandardMaterial(o);
 const rnd = (a, b) => a + Math.random() * (b - a);
@@ -90,22 +91,9 @@ function giraffeTex() {
     x.putImageData(img, 0, 0); hx.putImageData(him, 0, 0);
   });
 }
-// чешуя крокодила: прямоугольные щитки рядами + бугорки
-function crocSkinTex() {
-  return cvH(256, 256, (x, hx, w, h) => {
-    x.fillStyle = "#3a4a22"; x.fillRect(0, 0, w, h);
-    for (let j = 0; j < 16; j++) for (let i = 0; i < 10; i++) {
-      const sx = i * 26 + (j % 2) * 13, sy = j * 16, sw = rnd(20, 25), sh = rnd(12, 15);
-      x.fillStyle = `hsl(${rnd(70, 90)} ${rnd(25, 40)}% ${rnd(16, 28)}%)`; x.fillRect(sx, sy, sw, sh);
-      const g = hx.createRadialGradient(sx + sw / 2, sy + sh / 2, 0, sx + sw / 2, sy + sh / 2, sw * 0.6); g.addColorStop(0, "#fff"); g.addColorStop(1, "#333");
-      hx.fillStyle = g; hx.fillRect(sx, sy, sw, sh);
-      if (Math.random() < 0.3) { x.fillStyle = "rgba(20,25,10,.5)"; x.beginPath(); x.arc(sx + sw / 2, sy + sh / 2, 3, 0, 6.28); x.fill(); }
-    }
-  });
-}
 function mats() {
   if (MAT) return MAT;
-  const mh = mahoganyTex(), orn = ornamentTex(), tuft = tuftedTex("#b8481e", 4), silk = tuftedTex("#e9b83a", 4), gir = giraffeTex(), cs = crocSkinTex();
+  const mh = mahoganyTex(), orn = ornamentTex(), tuft = tuftedTex("#b8481e", 4), silk = tuftedTex("#e9b83a", 4), gir = giraffeTex();
   MAT = {
     gold: std({ color: 0xf0c75e, metalness: 1, roughness: 0.22 }),
     goldDark: std({ color: 0xb8902e, metalness: 1, roughness: 0.35 }),
@@ -122,9 +110,6 @@ function mats() {
     }) }),
     blackGlass: new THREE.MeshPhysicalMaterial({ color: 0x0a0a10, roughness: 0.05, clearcoat: 1, metalness: 0.3 }),
     shadeBlack: std({ color: 0x15151a, roughness: 0.7, side: THREE.DoubleSide, emissive: 0x3a2a10, emissiveIntensity: 0.3 }),
-    croc: std({ map: cs.map, normalMap: cs.normal, normalScale: new THREE.Vector2(1.4, 1.4), roughness: 0.55 }), crocBelly: std({ color: 0xc8c090, roughness: 0.75 }),
-    mouth: std({ color: 0xd88a80, roughness: 0.5 }),
-    teeth: std({ color: 0xf4f0e0, roughness: 0.4 }), eye: std({ color: 0xe8c020, emissive: 0x605000, emissiveIntensity: 0.6, roughness: 0.2 }),
   };
   return MAT;
 }
@@ -145,15 +130,19 @@ function cabriole(mat, h, r, out, parent, x, z, rotY) {
 }
 
 // золотая лепная полоса заданной высоты: свой экземпляр текстуры с повтором под размер (u — метры, v — высота)
+// (кэш: клон текстуры — это новая загрузка в видеопамять, поэтому одинаковые полосы делят один материал)
+const ornCache = {};
 function ornMat(hM, perM = 2.2) {
+  const k = hM + "|" + perM; if (ornCache[k]) return ornCache[k];
   const m = mats().goldOrn.clone(); m.map = m.map.clone(); m.normalMap = m.normalMap.clone();
   [m.map, m.normalMap].forEach(t => { t.repeat.set(perM, 1 / hM); t.needsUpdate = true; });
-  return m;
+  return (ornCache[k] = m);
 }
 // плоская лепная накладка на фасад (PlaneGeometry: uv 0..1 → вся полоса)
 function ornPlate(w, h, parent, x, y, z, ry = 0) {
-  const m = mats().goldOrn.clone(); m.map = m.map.clone(); m.normalMap = m.normalMap.clone();
-  [m.map, m.normalMap].forEach(t => { t.repeat.set(Math.max(1, Math.round(w / h / 4)), 1); t.needsUpdate = true; });
+  const n = Math.max(1, Math.round(w / h / 4)), k = "plate|" + n;
+  const m = ornCache[k] || (ornCache[k] = mats().goldOrn.clone());
+  if (m.map === mats().goldOrn.map) { m.map = m.map.clone(); m.normalMap = m.normalMap.clone(); [m.map, m.normalMap].forEach(t => { t.repeat.set(n, 1); t.needsUpdate = true; }); }
   const p = mesh(new THREE.PlaneGeometry(w, h), m, x, y, z, parent); p.rotation.y = ry; p.castShadow = false; return p;
 }
 // резная ножка-волюта: золотой завиток + ножка красного дерева
@@ -279,33 +268,69 @@ export const KAPITAL = {
   },
   leopard(T) { const g = new THREE.Group(); const p = mesh(new THREE.PlaneGeometry(0.85, 0.85 * 563 / 353, 12, 18), M.photo(T.kapLeopard), 0, 0, 0, g); p.rotation.x = -Math.PI / 2; p.castShadow = false; rugWave(g, p, 0.85); return g; },
   rug_lux(T) { const g = new THREE.Group(); const p = mesh(new THREE.PlaneGeometry(1.6, 1.6 * 554 / 361, 24, 30), M.photoRug(T.kapRug), 0, 0, 0, g); p.rotation.x = -Math.PI / 2; p.rotation.z = Math.PI / 2; p.castShadow = false; rugWave(g, p, 1.6); return g; },
-  // розовый пушистый ковёр: «мех» из 16 слоёв-оболочек (shell fur) — ворсинки становятся тоньше к кончикам;
-  // гладишь — по ворсу пробегает волна
+  // розовый пушистый ковёр (раунд 3): длинный ворс локонами — 26 слоёв-оболочек (shell fur) по карте прядей,
+  // каждая прядь клонится в свою сторону, к кончикам светлее и тоньше, край пушится наружу. Сам по себе ворс
+  // чуть колышется; «погладить» — по ковру проходит ладонь: ворс приминается полосой и пружинит обратно
   pinkrug() {
-    const g = new THREE.Group(), N = 16, S = 256;
-    const shape = (a) => 1 + 0.12 * Math.sin(a * 3) + 0.06 * Math.sin(a * 7);
-    const base = cv(S, S, (x, w, h) => { // подложка: розовая клякса
-      x.beginPath(); for (let a = 0; a <= 6.3; a += 0.1) x.lineTo(w / 2 + Math.cos(a) * w * 0.46 * shape(a), h / 2 + Math.sin(a) * h * 0.44 * shape(a)); x.closePath();
-      x.fillStyle = "#d8789e"; x.fill();
-    });
-    const strands = cv(S * 2, S * 2, (x, w, h) => { // ворсинки: точки разной «высоты» (яркость = длина)
+    const g = new THREE.Group(), N = 28, S = 512, W = 1.3, D = 0.98, H = 0.045, GX = 40, GZ = 30;
+    const edge = a => 1 + 0.05 * Math.sin(a * 3 + 1) + 0.03 * Math.sin(a * 5);
+    const blob = (x, w, h, k = 1) => { x.beginPath(); for (let a = 0; a <= 6.3; a += 0.05) x.lineTo(w / 2 + Math.cos(a) * w * 0.45 * k * edge(a), h / 2 + Math.sin(a) * h * 0.45 * k * edge(a)); x.closePath(); };
+    const base = cv(256, 256, (x, w, h) => { blob(x, w, h); x.fillStyle = "#d77aa0"; x.fill(); });
+    // пряди: локон = мягкое пятно (центр ярче = прядь длиннее); у края пряди длиннее и редеют наружу
+    const strands = cv(S, S, (x, w, h) => {
       x.fillStyle = "#000"; x.fillRect(0, 0, w, h);
-      for (let i = 0; i < 26000; i++) { const v = 40 + Math.random() * 215 | 0; x.fillStyle = `rgb(${v},${v},${v})`; x.fillRect(Math.random() * w, Math.random() * h, 2, 2); }
-      x.globalCompositeOperation = "destination-in"; x.beginPath();
-      for (let a = 0; a <= 6.3; a += 0.1) x.lineTo(w / 2 + Math.cos(a) * w * 0.46 * shape(a), h / 2 + Math.sin(a) * h * 0.44 * shape(a)); x.closePath(); x.fill();
+      for (let i = 0; i < 16000; i++) {
+        const px = Math.random() * w, py = Math.random() * h, r = 2.5 + Math.random() * 4, v = 170 + Math.random() * 85;
+        const gr = x.createRadialGradient(px, py, 0, px, py, r); gr.addColorStop(0, `rgb(${v},${v},${v})`); gr.addColorStop(1, "rgba(0,0,0,0)");
+        x.fillStyle = gr; x.fillRect(px - r, py - r, r * 2, r * 2);
+      }
+      x.globalCompositeOperation = "destination-in"; x.fillStyle = "#fff"; blob(x, w, h, 1.06); x.fill();
     });
     strands.colorSpace = THREE.NoColorSpace;
-    const W = 1.3, D = 0.98;
-    const b = mesh(new THREE.PlaneGeometry(W, D), std({ map: base, transparent: true, alphaTest: 0.5, roughness: 1 }), 0, 0, 0, g); b.rotation.x = -Math.PI / 2; b.castShadow = false;
+    const b = mesh(new THREE.PlaneGeometry(W, D), std({ map: base, transparent: true, alphaTest: 0.5, roughness: 1 }), 0, 0.001, 0, g); b.rotation.x = -Math.PI / 2; b.castShadow = false;
+    // направление «причёски»: плавное поле наклона прядей
+    const lean = (u, v) => [Math.sin(v * 5 + u * 2) * 0.6 + 0.3, Math.cos(u * 4 - v * 3) * 0.6];
     const layers = [];
     for (let i = 1; i <= N; i++) {
-      const k = i / N, col = new THREE.Color().setHSL(0.94, 0.62, 0.62 + k * 0.22);
-      const mtl = new THREE.MeshStandardMaterial({ color: col, alphaMap: strands, alphaTest: 0.16 + k * 0.78, transparent: false, roughness: 1, side: THREE.DoubleSide });
-      const L = mesh(new THREE.PlaneGeometry(W, D), mtl, 0, k * 0.035, 0, g); L.rotation.x = -Math.PI / 2; L.castShadow = false; L.receiveShadow = true;
-      layers.push(L);
+      const k = i / N, col = new THREE.Color().setHSL(0.94, 0.68, 0.56 + k * 0.24);
+      const mtl = new THREE.MeshStandardMaterial({ color: col, alphaMap: strands, alphaTest: 0.04 + k * 0.7, roughness: 0.9, side: THREE.DoubleSide });
+      const geo = new THREE.PlaneGeometry(W * (1 + k * 0.05), D * (1 + k * 0.05), GX, GZ); geo.rotateX(-Math.PI / 2);
+      const L = mesh(geo, mtl, 0, 0, 0, g); L.castShadow = false; L.receiveShadow = true;
+      const pos = geo.attributes.position, rest = new Float32Array(pos.count * 3);
+      for (let v = 0; v < pos.count; v++) {
+        const u = pos.getX(v) / W + 0.5, w2 = pos.getZ(v) / D + 0.5, [lx, lz] = lean(u, w2);
+        rest[v * 3] = pos.getX(v) + lx * k * k * 0.04; rest[v * 3 + 1] = 0.002 + k * H; rest[v * 3 + 2] = pos.getZ(v) + lz * k * k * 0.04;
+        pos.setXYZ(v, rest[v * 3], rest[v * 3 + 1], rest[v * 3 + 2]);
+      }
+      layers.push({ L, pos, rest, k });
     }
     g.userData.flat = true;
-    g.userData.act = play => play(1200, p => layers.forEach((L, i) => { const k = (i + 1) / N; L.position.x = Math.sin(p * Math.PI * 2 - i * 0.15) * 0.012 * k * (1 - p); L.position.z = Math.sin(p * Math.PI * 3) * 0.008 * k * (1 - p); }));
+    let stroke = -1; // 0..1 — где сейчас ладонь (по длине ковра), -1 — не гладят
+    const shape = now => {
+      const t = now / 1000;
+      for (const { pos, rest, k } of layers) {
+        for (let v = 0; v < pos.count; v++) {
+          const x0 = rest[v * 3], z0 = rest[v * 3 + 2];
+          const sway = Math.sin(t * 1.3 + x0 * 4 + z0 * 3) * 0.004 * k * k;               // ворс дышит
+          let dx = sway, dy = 0;
+          if (stroke >= 0) { // ладонь идёт по ковру: под ней ворс прижат и зачёсан вперёд, позади остаётся след,
+            // который за пару секунд поднимается обратно — как на настоящем длинном ворсе
+            const hx = -W * 0.75 + stroke * W, d = x0 - hx, press = Math.exp(-(d * d) / 0.006);
+            const trail = d < 0 ? Math.exp(d / W / 1.8 - Math.max(0, stroke - 1.5) * 0.9) : 0;
+            const f = Math.max(press, trail * 0.85);
+            dy = -f * 0.75 * k * H; dx += f * 0.09 * k * k;
+          }
+          pos.setXYZ(v, x0 + dx, rest[v * 3 + 1] + dy, z0);
+        }
+        pos.needsUpdate = true;
+      }
+    };
+    let last = 0, t0 = 0;
+    g.userData.tick = now => {
+      if (t0) { stroke = (now - t0) / 1000 / 1.4; if (stroke > 5) { stroke = -1; t0 = 0; } } // ладонь — 1.4 с, след тает ещё ~3 с
+      if (stroke < 0 && now - last < 66) return; last = now; shape(now);                 // в покое — 15 раз в секунду
+    };
+    g.userData.act = () => { t0 = performance.now(); };
     return g;
   },
   // «Чёрный квадрат» по фото оригинала в лепной золотой раме; «вглядеться» — картина слегка перекашивается и выпрямляется
@@ -333,110 +358,92 @@ export const KAPITAL = {
     g.userData.act = play => play(2400, p => { const k = 1 + Math.max(0, Math.sin(p * Math.PI * 16)) * 0.025 * (1 - p * 0.5); g.scale.set(k, 1 + (k - 1) * 1.5, k); });
     return g;
   },
-  // квантовый сервер «Вечный мозг»: фото на постаменте из чёрного стекла, лампочки переливаются
-  brain(T) {
-    const m = mats(), g = new THREE.Group(), W = 1.05, H = W * 471 / 729, P = 0.4;
-    mesh(rbox(0.75, P, 0.45, 0.02), m.blackGlass, 0, P / 2, 0, g);
-    mesh(box(0.77, 0.02, 0.47), m.gold, 0, P, 0, g);
-    const p = photoPlane(T.kapBrain, W, H); p.children[0].position.y = P + 0.01 + H / 2; p.children[0].material.emissive = new THREE.Color(0x222233); g.add(p);
-    const cols = [0x40e0ff, 0xff40c0, 0xffe040, 0x60ff80, 0x8080ff];
-    const lights = Array.from({ length: 18 }, (_, i) => {
-      const s = sparkle(cols[i % cols.length], rnd(0.03, 0.06));
-      s.position.set(rnd(-W * 0.42, W * 0.42), P + rnd(0.15, 0.9) * H, 0.02); g.add(s); return s;
-    });
-    let burst = 0; // «Спросить»: лампочки бегают в 4 раза быстрее, мозг думает
-    g.userData.tick = now => lights.forEach((s, i) => { const f = now < burst ? 4 : 1; s.material.opacity = 0.35 + 0.65 * Math.max(0, Math.sin(now * f / (180 + i * 23) + i)); s.scale.setScalar((now < burst ? 0.08 : 0.045)); });
+  // квантовый сервер «Вечный мозг» (раунд 3): объёмный, а не фото на постаменте. Золотой мозг с извилинами
+  // (сфера, продавленная бороздами), снизу синие «платы», усыпан бриллиантами, рубинами и сапфирами; сверху —
+  // большой бриллиант в радужной оправе. Стоит под стеклянным колпаком на чёрной серверной стойке: диоды мигают,
+  // из-под мозга в стойку уходит оптоволокно, по нему бегут огоньки. Медленно вращается, как экспонат.
+  // «Задать вопрос» — думает: всё мигает вчетверо, мозг накаляется, бриллиант вспыхивает
+  brain() {
+    const m = mats(), g = new THREE.Group(), CW = 0.62, CH = 0.56, CD = 0.46;
+    // стойка: чёрное стекло, золотая окантовка, спереди — панель диодов (холст, перерисовывается)
+    const led = Object.assign(document.createElement("canvas"), { width: 128, height: 96 }), lx = led.getContext("2d");
+    const ledT = new THREE.CanvasTexture(led); ledT.colorSpace = THREE.SRGBColorSpace;
+    const ledMat = std({ map: ledT, emissiveMap: ledT, emissive: 0xffffff, emissiveIntensity: 1.2, roughness: 0.15, metalness: 0.2 });
+    mesh(rbox(CW, CH, CD, 0.015), [m.blackGlass, m.blackGlass, m.blackGlass, m.blackGlass, ledMat, m.blackGlass], 0, CH / 2, 0, g);
+    [[0, CH, 0, CW + 0.02, 0.02, CD + 0.02], [0, 0.01, 0, CW + 0.02, 0.02, CD + 0.02]].forEach(([x0, y0, z0, w, h, d]) => mesh(box(w, h, d), m.gold, x0, y0, z0, g));
+    const LEDC = ["#40e0ff", "#ff40c0", "#ffe040", "#60ff80", "#8080ff"], leds = Array.from({ length: 6 * 14 }, () => Math.random());
+    // мозг на вращающемся столике
+    const turn = new THREE.Group(); turn.position.y = CH + 0.02; g.add(turn);
+    mesh(cyl(0.2, 0.22, 0.04, 40), m.goldOrn, 0, 0.02, 0, turn);
+    const R = 0.17, geo = new THREE.SphereGeometry(R, 96, 64), pos = geo.attributes.position, n = new THREE.Vector3(), cols = [];
+    const blue = new THREE.Color(0x2a4ab8), gold = new THREE.Color(1, 1, 1);
+    for (let v = 0; v < pos.count; v++) {
+      n.fromBufferAttribute(pos, v).normalize();
+      // извилины: модуль суммы синусов даёт хребты и борозды; продольная щель между полушариями; низ приплюснут
+      const f = Math.abs(Math.sin(n.x * 11 + Math.sin(n.y * 7) * 2.2) + Math.sin(n.y * 13 + n.z * 5) * 0.8 + Math.sin(n.z * 9 - n.x * 4) * 0.6);
+      let r = R * (1 + 0.06 * Math.min(1.6, f) - 0.05);
+      if (n.y > -0.2) r -= R * 0.12 * Math.exp(-(n.z * n.z) / 0.004) * Math.min(1, (n.y + 0.2) * 3);
+      const p = n.clone().multiplyScalar(r); p.x *= 1.3; p.z *= 0.95; p.y = p.y > 0 ? p.y * 0.95 : p.y * 0.55;
+      pos.setXYZ(v, p.x, p.y, p.z);
+      const c = n.y < -0.15 && Math.abs(n.z) > 0.35 ? blue : gold; cols.push(c.r, c.g, c.b);   // височные доли — синие «платы»
+    }
+    geo.setAttribute("color", new THREE.Float32BufferAttribute(cols, 3)); geo.computeVertexNormals();
+    const brainMat = new THREE.MeshPhysicalMaterial({ color: 0xf2c25a, vertexColors: true, metalness: 1, roughness: 0.22, clearcoat: 0.6, emissive: 0x6a3a00, emissiveIntensity: 0 });
+    const brainM = mesh(geo, brainMat, 0, 0.17, 0, turn);
+    // камни на гребнях извилин: белые — бриллианты, красные — рубины, синие — сапфиры
+    const gemGeo = new THREE.IcosahedronGeometry(0.006, 0), gems = new THREE.InstancedMesh(gemGeo, new THREE.MeshPhysicalMaterial({ roughness: 0.05, metalness: 0.1, clearcoat: 1, emissive: 0xffffff, emissiveIntensity: 0.12 }), 170);
+    const o = new THREE.Object3D(), tmp = new THREE.Vector3(), GC = [0xffffff, 0xffffff, 0xffffff, 0xb0001a, 0x0a2ac8];
+    for (let i = 0, tries = 0; i < 170 && tries < 20000; tries++) {
+      const v = Math.floor(Math.random() * pos.count); tmp.fromBufferAttribute(pos, v); n.copy(tmp).normalize();
+      if (tmp.length() < R * 0.98 || n.y < -0.25) continue; // только на гребнях и не снизу
+      o.position.copy(tmp).addScaledVector(n, 0.003); o.scale.setScalar(0.6 + Math.random() * 0.6); o.rotation.set(Math.random() * 6, Math.random() * 6, 0); o.updateMatrix();
+      gems.setMatrixAt(i, o.matrix); gems.setColorAt(i, new THREE.Color(GC[i % GC.length])); i++;
+    }
+    gems.position.y = 0.17; gems.castShadow = false; turn.add(gems);
+    // большой бриллиант сверху в радужной оправе
+    const crown = new THREE.Group(); crown.position.set(0.02, 0.17 + R * 0.93, 0); turn.add(crown);
+    const dia = mesh(new THREE.OctahedronGeometry(0.04, 0), new THREE.MeshPhysicalMaterial({ color: 0xeaf6ff, roughness: 0, metalness: 0.2, clearcoat: 1, emissive: 0x88aaff, emissiveIntensity: 0.25 }), 0, 0.03, 0, crown);
+    dia.scale.set(1, 0.8, 1); dia.rotation.y = Math.PI / 4;
+    const ringGeo = new THREE.TorusGeometry(0.05, 0.008, 8, 48), rc = [], rp = ringGeo.attributes.position;
+    for (let v = 0; v < rp.count; v++) { const c = new THREE.Color().setHSL((Math.atan2(rp.getY(v), rp.getX(v)) / 6.283 + 1) % 1, 1, 0.55); rc.push(c.r, c.g, c.b); }
+    ringGeo.setAttribute("color", new THREE.Float32BufferAttribute(rc, 3));
+    const ring = mesh(ringGeo, new THREE.MeshStandardMaterial({ vertexColors: true, emissive: 0xffffff, emissiveIntensity: 0.35, roughness: 0.2, metalness: 0.5 }), 0, 0.02, 0, crown); ring.rotation.x = Math.PI / 2;
+    // оптоволокно: пучки из-под мозга веером вниз в стойку, по ним бегут огоньки
+    const fibers = [], fiberMat = [0x40e0ff, 0xc060ff, 0xffd070].map(c => new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.55, toneMapped: false }));
+    for (let i = 0; i < 26; i++) {
+      const a = i / 26 * Math.PI * 2 + Math.random() * 0.2, r0 = 0.06 + Math.random() * 0.05, out = 0.22 + Math.random() * 0.06;
+      const c = new THREE.CatmullRomCurve3([new THREE.Vector3(Math.cos(a) * r0 * 1.3, 0.1, Math.sin(a) * r0), new THREE.Vector3(Math.cos(a) * out * 1.1, 0.06 + Math.random() * 0.05, Math.sin(a) * out),
+        new THREE.Vector3(Math.cos(a) * (out - 0.02), 0.0, Math.sin(a) * (out - 0.03))]);
+      const t = new THREE.Mesh(new THREE.TubeGeometry(c, 16, 0.0022, 4), fiberMat[i % 3]); turn.add(t);
+      fibers.push(c);
+    }
+    const pulses = Array.from({ length: 14 }, (_, i) => { const sp = sparkle([0x40e0ff, 0xff60e0, 0xffe080][i % 3], 0.03); turn.add(sp); return { sp, c: fibers[(i * 7) % fibers.length], ph: Math.random() }; });
+    // стеклянный колпак с золотым кольцом
+    const dome = new THREE.Mesh(new THREE.SphereGeometry(0.3, 40, 20, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshPhysicalMaterial({ color: 0xffffff, transparent: true, opacity: 0.1, roughness: 0.02, clearcoat: 1, depthWrite: false, side: THREE.DoubleSide }));
+    dome.scale.set(1.05, 1.15, 0.85); dome.position.y = CH + 0.04; dome.renderOrder = 2; g.add(dome);
+    mesh(new THREE.TorusGeometry(0.3, 0.012, 8, 48), m.gold, 0, CH + 0.045, 0, g).scale.set(1.05, 0.85, 1);
+    g.children[g.children.length - 1].rotation.x = Math.PI / 2;
+    let burst = 0, lastLed = 0;
+    g.userData.tick = now => {
+      const hot = now < burst, f = hot ? 4 : 1;
+      turn.rotation.y = now / 9000;
+      if (now - lastLed > (hot ? 40 : 160)) { // диоды: ряды огоньков, часть мигает
+        lastLed = now; lx.fillStyle = "#07070c"; lx.fillRect(0, 0, 128, 96);
+        lx.fillStyle = "#c9a23a"; lx.fillRect(4, 4, 120, 2); lx.fillRect(4, 90, 120, 2);
+        leds.forEach((v, i) => { const r = i / 14 | 0, c = i % 14; if (Math.random() < (hot ? 0.5 : 0.08)) leds[i] = Math.random(); if (leds[i] > 0.35) { lx.fillStyle = LEDC[(r + c) % 5]; lx.fillRect(10 + c * 8, 14 + r * 12, 5, 4); } });
+        lx.fillStyle = hot ? "#ff40c0" : "#40e0ff"; lx.font = "bold 8px sans-serif"; lx.fillText(hot ? "THINKING…" : "ETERNAL BRAIN", 10, 86);
+        ledT.needsUpdate = true;
+      }
+      pulses.forEach(p => { const q = ((now / 1600) * f + p.ph) % 1; p.sp.position.copy(p.c.getPoint(1 - q)); p.sp.material.opacity = Math.sin(q * Math.PI); });
+      brainMat.emissiveIntensity += ((hot ? 0.9 : 0.08 + 0.05 * Math.sin(now / 700)) - brainMat.emissiveIntensity) * 0.08;
+      dia.material.emissiveIntensity = hot ? 0.6 + 0.6 * Math.abs(Math.sin(now / 80)) : 0.25;
+      ring.rotation.z = now / 600 * f;
+    };
     g.userData.act = () => { burst = performance.now() + 2500; };
     return g;
   },
-  // крокодил Мистер Кро: чешуя со щитками, гребни на спине, длинная плоская морда, глаза-бугорки. Сам иногда
-  // зевает и уползает. Клик — страшно разевает пасть, бросается вперёд и рычит (звук — в main.js)
-  croc() {
-    const m = mats(), g = new THREE.Group(), body = new THREE.Group(); g.add(body);
-    const L = 1.0; // длина туловища; с хвостом и мордой ≈ 1.9 м
-    const tor = mesh(new THREE.SphereGeometry(0.16, 24, 14), m.croc, 0, 0.11, 0, body); tor.scale.set(L / 0.32, 0.5, 0.9);
-    const belly = mesh(new THREE.SphereGeometry(0.15, 20, 10), m.crocBelly, 0, 0.085, 0, body); belly.scale.set(L / 0.3, 0.32, 0.85);
-    const scute = new THREE.SphereGeometry(0.02, 8, 6); scute.scale(1.3, 0.75, 0.9);
-    for (let i = 0; i < 16; i++) [-2, -1, 0, 1, 2].forEach(r => { // ряды костяных щитков на спине
-      const xx = -L * 0.44 + i * L * 0.058, w = Math.sqrt(Math.max(0, 1 - (xx / (L * 0.5)) ** 2));
-      if (Math.abs(r) === 2 && w < 0.6) return;
-      mesh(scute, m.croc, xx, 0.11 + 0.075 * w - Math.abs(r) * 0.012, r * 0.034 * (0.5 + w * 0.6), body);
-    });
-    // хвост: 7 звеньев, сужается и сплющивается с боков, гребень двойной
-    const tail = new THREE.Group(); tail.position.set(-L * 0.48, 0.1, 0); body.add(tail);
-    const segs = []; let parent = tail;
-    for (let i = 0; i < 7; i++) {
-      const sg = new THREE.Group(); sg.position.x = i ? -0.1 : 0; parent.add(sg);
-      const k = 1 - i * 0.12, s = mesh(new THREE.SphereGeometry(0.075 * k, 12, 8), m.croc, -0.05, 0, 0, sg); s.scale.set(2.2, 0.75, 0.85 - i * 0.06);
-      [-1, 1].forEach(sd => mesh(scute, m.croc, -0.05, 0.05 * k, sd * 0.018 * k, sg));
-      segs.push(sg); parent = sg;
-    }
-    // голова: череп + длинная сужающаяся морда, ноздри на кончике, глаза над головой
-    const head = new THREE.Group(); head.position.set(L * 0.46, 0.115, 0); body.add(head);
-    const up = new THREE.Group(); head.add(up);
-    const skull = mesh(new THREE.SphereGeometry(0.1, 16, 10), m.croc, 0.04, 0.02, 0, up); skull.scale.set(1.2, 0.5, 0.95);
-    const snoutGeo = new THREE.CylinderGeometry(0.035, 0.075, 0.34, 14, 1); snoutGeo.rotateZ(-Math.PI / 2); snoutGeo.scale(1, 0.45, 1);
-    mesh(snoutGeo, m.croc, 0.27, 0.0, 0, up);
-    [-1, 1].forEach(sd => {
-      mesh(new THREE.SphereGeometry(0.03, 12, 8), m.croc, 0.03, 0.07, sd * 0.055, up).scale.set(1, 0.8, 1);
-      mesh(new THREE.SphereGeometry(0.022, 12, 8), m.eye, 0.045, 0.08, sd * 0.06, up);
-      mesh(new THREE.SphereGeometry(0.009, 6, 6), M.blackRim, 0.06, 0.085, sd * 0.07, up).scale.set(0.5, 1.4, 1); // вертикальный зрачок
-      mesh(new THREE.SphereGeometry(0.01, 6, 6), m.croc, 0.43, 0.025, sd * 0.016, up);
-    });
-    // нёбо и зубы сверху
-    mesh(box(0.36, 0.008, 0.1), m.mouth, 0.24, -0.018, 0, up);
-    const jaw = new THREE.Group(); jaw.position.set(-0.02, -0.01, 0); head.add(jaw);
-    const jawGeo = new THREE.CylinderGeometry(0.032, 0.07, 0.38, 14, 1); jawGeo.rotateZ(-Math.PI / 2); jawGeo.scale(1, 0.3, 1);
-    mesh(jawGeo, m.crocBelly, 0.25, -0.02, 0, jaw);
-    mesh(box(0.34, 0.006, 0.09), m.mouth, 0.25, -0.004, 0, jaw);
-    const tongue = mesh(new THREE.SphereGeometry(0.04, 10, 6), m.mouth, 0.14, 0.0, 0, jaw); tongue.scale.set(1.8, 0.3, 0.9);
-    for (let i = 0; i < 10; i++) [-1, 1].forEach(sd => {
-      const w = 0.075 - i * 0.0045, xx = 0.08 + i * 0.036, big = i === 2 || i === 6 ? 1.6 : 1;
-      mesh(new THREE.ConeGeometry(0.007, 0.028 * big, 5), m.teeth, xx, 0.012, sd * w * 0.62, jaw);
-      const tt = mesh(new THREE.ConeGeometry(0.007, 0.03 * big, 5), m.teeth, xx + 0.018, -0.03, sd * w * 0.6, up); tt.rotation.x = Math.PI;
-    });
-    // лапы: из боков в стороны и вниз, «полуползком», с когтями
-    const legs = [[0.3, 1], [0.3, -1], [-0.3, 1], [-0.3, -1]].map(([x0, sd]) => {
-      const l = new THREE.Group(); l.position.set(x0, 0.1, sd * 0.1); body.add(l);
-      const c = new THREE.CatmullRomCurve3([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0.01, -0.03, sd * 0.09), new THREE.Vector3(0.03, -0.085, sd * 0.13)]);
-      mesh(new THREE.TubeGeometry(c, 8, 0.03, 8), m.croc, 0, 0, 0, l);
-      const foot = mesh(new THREE.SphereGeometry(0.038, 10, 6), m.croc, 0.05, -0.09, sd * 0.14, l); foot.scale.set(1.5, 0.35, 1.1);
-      for (let k = -1; k <= 1; k++) mesh(new THREE.ConeGeometry(0.006, 0.03, 4), m.teeth, 0.1, -0.095, sd * 0.14 + k * 0.022, l).rotation.z = -Math.PI / 2;
-      return l;
-    });
-    let state = "idle", t0 = 0, next = performance.now() + rnd(4000, 9000), from = null, to = null, amp = 0.5;
-    let home = new THREE.Vector3();
-    const roar = () => { if (state === "walk") body.position.copy(to); home = body.position.clone(); state = "roar"; t0 = performance.now(); };
-    g.userData.mouth = roar;
-    g.userData.tick = now => {
-      const t = (now - t0) / 1000;
-      segs.forEach((sg, i) => { sg.rotation.y = Math.sin(now / 520 + i * 0.6) * (state === "walk" ? 0.28 : state === "roar" ? 0.3 : 0.06); });
-      if (state === "idle" && now > next) {
-        if (Math.random() < 0.5) { state = "yawn"; t0 = now; }
-        else { state = "walk"; t0 = now; from = body.position.clone(); to = body.position.length() > 0.05 ? new THREE.Vector3() : new THREE.Vector3(rnd(-0.6, 0.6), 0, rnd(-0.4, 0.4)); }
-      }
-      if (state === "yawn") { // ленивый зевок
-        jaw.rotation.z = -Math.max(0, Math.sin(Math.min(1, t / 2) * Math.PI)) * 0.45;
-        if (t > 2) { state = "idle"; jaw.rotation.z = 0; next = now + rnd(6000, 12000); }
-      } else if (state === "roar") { // разевает пасть до упора, рывок вперёд, мотает головой
-        const p = Math.min(1, t / 1.8), open = p < 0.15 ? p / 0.15 : p > 0.8 ? (1 - p) / 0.2 : 1;
-        jaw.rotation.z = -open * 0.95; up.rotation.z = open * 0.18;
-        head.rotation.y = open * Math.sin(t * 22) * 0.12; head.rotation.z = open * 0.12;
-        const lunge = Math.sin(Math.min(1, p / 0.25) * Math.PI) * 0.12, r = body.rotation.y;
-        body.position.set(home.x + Math.cos(r) * lunge, 0, home.z - Math.sin(r) * lunge);
-        tongue.scale.y = 0.3 + open * 0.15;
-        if (p >= 1) { state = "idle"; jaw.rotation.z = up.rotation.z = head.rotation.y = head.rotation.z = 0; next = now + rnd(6000, 12000); }
-      } else if (state === "walk") {
-        const dur = from.distanceTo(to) / 0.15 + 0.3, p = Math.min(1, t / dur);
-        const dir = to.clone().sub(from);
-        if (dir.lengthSq() > 1e-4) body.rotation.y = Math.atan2(-dir.z, dir.x);
-        body.position.lerpVectors(from, to, p);
-        legs.forEach((l, i) => { l.rotation.z = Math.sin(now / 120 + (i % 3 ? 0 : Math.PI)) * 0.5; });
-        if (p >= 1) { state = "idle"; legs.forEach(l => { l.rotation.z = 0; }); next = now + rnd(6000, 14000); }
-      }
-    };
-    return g;
-  },
+  // крокодил Мистер Кро — отдельный модуль (js/models/croc.js)
+  croc: buildCroc,
   // мозаика «Ельцин»: смальта блестит; «посмотреть» — по мозаике пробегает блик
   yeltsin(T) {
     const g = new THREE.Group(), H = 0.95 * 768 / 512, pic = new THREE.Group(); g.add(pic);

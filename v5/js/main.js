@@ -7,13 +7,14 @@ import { CATALOG, SLOTS, SURFACES, itemById } from "./catalog.js";
 import { restore, restoreCost, setFitCheck } from "./shop.js";
 import { initFit, blockersByFit, clashes } from "./fit.js";
 import { initMaterials } from "./models/kit.js";
-import { buildItem, layout, hasV4 } from "./models/index.js";
+import { buildItem, layout } from "./models/index.js";
 import { pcScreen } from "./models/neformal.js";
 import { createPets } from "./pets.js";
 import { buildRoom, surfaceThumb, WIN } from "./models/room.js";
-import { loadTexts, t, cfg, QUESTIONS } from "./texts.js";
+import { loadTexts, t, cfg, QUESTIONS, hasText } from "./texts.js";
 import { st, has, on, initState } from "./state.js";
-import { initUI, updateUI, toast, tickMoney, thumbs, showPie, hidePie, openTray, setActionHandler, setPieExtras, fmt, closeDialog } from "./ui.js";
+import { initUI, updateUI, toast, tickMoney, thumbs, showPie, hidePie, openTray, setActionHandler, setPieExtras, setActLabel, fmt, closeDialog } from "./ui.js";
+import { actOf } from "./catalog.js";
 import * as A from "./audio.js";
 
 const $ = (id) => document.getElementById(id);
@@ -114,7 +115,7 @@ const beamPts = [];
 }
 
 // свет от телевизора и тёплый ореол вокруг экрана
-const tvLight = new THREE.PointLight(0xc4d4ff, 0, 3.5, 1.5);
+const tvLight = new THREE.PointLight(0xb8ccff, 0, 4.5, 1.2);
 scene.add(tvLight);
 function glowTex(stops) {
   const c = Object.assign(document.createElement("canvas"), { width: 128, height: 128 }), x = c.getContext("2d");
@@ -126,10 +127,31 @@ function glowTex(stops) {
 // телевизор светится сам, как торшер: голубоватое ядро от экрана, тёплый жёлтый край. Пока клип не смотрели —
 // свет ярче и «дышит», зовёт нажать; потом спокойный
 const tvGlow = new THREE.Sprite(new THREE.SpriteMaterial({
-  map: glowTex([[0, "rgba(200,225,255,.55)"], [0.3, "rgba(190,210,255,.38)"], [0.6, "rgba(255,214,150,.2)"], [1, "rgba(255,190,120,0)"]]),
+  map: glowTex([[0, "rgba(215,232,255,.9)"], [0.25, "rgba(180,205,255,.6)"], [0.55, "rgba(140,175,255,.25)"], [1, "rgba(120,160,255,0)"]]),
   blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, toneMapped: false }));
 tvGlow.scale.set(1.5, 1.25, 1); tvGlow.visible = false; scene.add(tvGlow);
+// раунд 3: свечение стало заметным — голубой ореол на стене за телевизором и мерцающее пятно света на полу перед ним
+const glowPlane = (w, h, stops) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: glowTex(stops), blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, toneMapped: false, polygonOffset: true, polygonOffsetFactor: -3 })); m.visible = false; m.renderOrder = 2; scene.add(m); return m; };
+const tvWall = glowPlane(2.1, 1.7, [[0, "rgba(170,200,255,.75)"], [0.35, "rgba(140,175,255,.4)"], [0.7, "rgba(120,150,255,.12)"], [1, "rgba(120,150,255,0)"]]);
+const tvFloor = glowPlane(2.0, 2.0, [[0, "rgba(150,185,255,.85)"], [0.4, "rgba(120,160,255,.42)"], [1, "rgba(110,140,255,0)"]]);
+tvFloor.rotation.x = -Math.PI / 2;
 const tvWarm = new THREE.PointLight(0xffd59a, 0, 3, 1.6); scene.add(tvWarm);
+
+// ---------- Пул ламп ----------
+// Свет торшера, жирафа, витрины стенки — это постоянные лампы сцены, а не PointLight внутри модели. Если добавлять
+// свет вместе с предметом, three.js перекомпилирует шейдеры у всех материалов комнаты (число ламп входит в шейдер) —
+// покупка набора замирала на секунды. Лампа модели остаётся «пультом» (невидима), пул повторяет её каждый кадр.
+const LAMPS = Array.from({ length: 4 }, () => { const l = new THREE.PointLight(0xffffff, 0, 1, 2); scene.add(l); return { l, src: null }; });
+function lampsAttach(g) { g.traverse(o => { if (!o.isPointLight) return; o.visible = false; const f = LAMPS.find(p => !p.src); if (f) f.src = o; }); }
+function lampsDetach(g) { LAMPS.forEach(p => { let o = p.src; while (o && o !== g) o = o.parent; if (o === g) { p.src = null; p.l.intensity = 0; } }); }
+const lampPos = new THREE.Vector3();
+function lampsTick() {
+  for (const p of LAMPS) {
+    if (!p.src) continue;
+    const s = p.src; s.getWorldPosition(lampPos); p.l.position.copy(lampPos);
+    p.l.color.copy(s.color); p.l.intensity = s.intensity; p.l.distance = s.distance; p.l.decay = s.decay;
+  }
+}
 
 // ---------- Предметы в сцене ----------
 const items = {}; // id -> group
@@ -146,12 +168,15 @@ function placeAll() {
   socket.visible = !has("tv");
   if (has("tv")) {
     const p = items.tv.userData.target;
-    tvLight.position.set(p.x, p.y + 0.3, p.z + 0.6);
-    tvGlow.position.set(p.x - 0.04, p.y + 0.36, p.z + 0.3);
-    tvWarm.position.set(p.x, p.y + 0.5, p.z + 0.45);
+    const r = items.tv.rotation.y, fx = Math.sin(r), fz = Math.cos(r); // куда смотрит экран
+    tvLight.position.set(p.x + fx * 0.6, p.y + 0.3, p.z + fz * 0.6);
+    tvGlow.position.set(p.x - 0.04 + fx * 0.32, p.y + 0.36, p.z + fz * 0.32);
+    tvWarm.position.set(p.x + fx * 0.45, p.y + 0.5, p.z + fz * 0.45);
+    tvWall.position.set(p.x, p.y + 0.34, 0.008); tvWall.userData.on = p.z < 0.6 && Math.abs(r) < 0.1; // ореол — только у задней стены
+    tvFloor.position.set(p.x + fx * 1.05, 0.008, p.z + fz * 1.05); tvFloor.rotation.z = r;
   }
-  tvLight.intensity = has("tv") ? 1.2 : 0;
-  tvGlow.visible = has("tv");
+  tvLight.intensity = has("tv") ? 2.4 : 0;
+  tvGlow.visible = has("tv"); tvFloor.visible = has("tv"); tvWall.visible = has("tv") && !!tvWall.userData.on;
 }
 const isSurface = id => SURFACES.has(itemById[id].slot);
 // покоцанное: темнее, грубее, с лёгкой «пылью»
@@ -165,8 +190,9 @@ function wearOut(g) {
 function rebuildItem(id) {
   const old = items[id]; if (!old) return;
   scene.remove(old);
-  const g = buildItem(id, T, st.v4[id]); if (st.damaged[id]) wearOut(g);
-  items[id] = g; scene.add(g); placeAll(); jiggle(id);
+  lampsDetach(old);
+  const g = buildItem(id, T); if (st.damaged[id]) wearOut(g);
+  items[id] = g; scene.add(g); lampsAttach(g); placeAll(); jiggle(id);
 }
 on("restored", id => { rebuildItem(id); toast(t("ui.restored", { name: itemById[id] && t(`item.${id}.name`) })); });
 const isPet = id => itemById[id].slot === "pets";
@@ -174,9 +200,9 @@ let fartSaid = false;
 const pets = createPets(scene, { onFart: () => { A.fart(); if (!fartSaid) { fartSaid = true; toast(t("item.matvey.fart")); } } });
 on("add", id => {
   if (isSurface(id)) { room.applySurface(itemById[id].slot, id); if (itemById[id].slot === "window") A.setView(id); return; }
-  const g = buildItem(id, T, st.v4[id]);
+  const g = buildItem(id, T);
   if (st.damaged[id]) wearOut(g);
-  items[id] = g; scene.add(g);
+  items[id] = g; scene.add(g); lampsAttach(g);
   g.userData.dropping = true;
   if (isPet(id)) pets.add(id, g);
   anims.push({ g, t0: performance.now(), kind: "drop" });
@@ -185,40 +211,52 @@ on("add", id => {
 on("remove", id => {
   if (isSurface(id)) { const s = itemById[id].slot; if (!Object.keys(st.owned).some(o => itemById[o].slot === s)) { room.applySurface(s, null); if (s === "window") A.setView(null); } return; }
   const g = items[id]; if (!g) return;
-  scene.remove(g); delete items[id]; pets.remove(id);
+  scene.remove(g); lampsDetach(g); delete items[id]; pets.remove(id); A.deviceOff(id);
   placeAll();
 });
 on("change", () => { placeAll(); pets.rebuild(items); });
 
 initUI();
 setActionHandler(action);
-// «Вид: по фото ↔ как в v4» для переделанных предметов
+// что сейчас включено: для подписи «Выключить» (item.<id>.act.off в тексты.txt)
+const isOn = id => ({ radiola: A.playingDevice() === "radiola", music: A.playingDevice() === "music", audio: A.playingDevice() === "audio",
+  torsher: !!items.torsher && items.torsher.userData.light.intensity > 0, giraffe: !!items.giraffe && items.giraffe.userData.light.intensity > 0 })[id];
+setActLabel(id => isOn(id) && hasText(`item.${id}.act.off`) ? t(`item.${id}.act.off`) : actOf(id));
+// техника показывает, что играет: у радиолы поднята крышка и крутится пластинка, у колонок качают басы
+function devicesShow() {
+  const d = A.playingDevice();
+  if (items.radiola) { MAT.dial.color.set(d === "radiola" ? 0xffffff : 0xb8a888); items.radiola.userData.setPlaying(d === "radiola"); }
+  for (const id of ["music", "audio"]) if (items[id] && items[id].userData.setPlaying) items[id].userData.setPlaying(d === id);
+}
 setPieExtras(id => [...pieExtra(id), ...(st.damaged[id] ? [{ t: t("ui.restore", { n: fmt(st.test ? 0 : restoreCost(id)) }), a: () => restore(id) }] : [])]);
-const pieExtra = id => isPet(id) ? [{ t: t("pet.feed"), a: () => { pets.act(id, "feed"); A.feed(id); toast(t(`item.${id}.feed`)); } }] : hasV4(id) ? [{ t: t(st.v4[id] ? "ui.variant.photo" : "ui.variant.v4"), a: () => {
-  st.v4[id] = !st.v4[id]; rebuildItem(id); A.blip(1000, 0.05);
-} }] : [];
+const pieExtra = id => isPet(id) ? [{ t: t("pet.feed"), a: () => { pets.act(id, "feed"); A.feed(id); toast(t(`item.${id}.feed`)); } }] : [];
 
 // ---------- Клики по предметам: круговое меню ----------
 const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
 function pick(ev) {
   ndc.set(ev.clientX / innerWidth * 2 - 1, -(ev.clientY / innerHeight) * 2 + 1);
   ray.setFromCamera(ndc, camera);
-  const ids = [];
+  const ids = [], dist = [];
   lastHit = null;
   for (const hit of ray.intersectObjects([...Object.values(items), windowGroup, room.radiator, ...room.pickables.filter(m => m.visible)], true)) {
     let o = hit.object;
     while (o && !o.userData.id) o = o.parent;
     if (!o || ids.includes(o.userData.id)) continue;
     if (o.userData.id === "walls") { if (ids.length) continue; lastHit = hit; } // стена — только если перед ней ничего нет
-    ids.push(o.userData.id);
+    ids.push(o.userData.id); dist.push(hit.distance);
   }
-  if (ids[0] === "walls" && ids.length > 1) ids.shift(); // окно и батарея в стене важнее самой стены
-  // мелочь на полках, столах и тумбах важнее самой мебели: луч сначала упирается в стекло витрины или столешницу
-  const carrier = ids[0] && CARRIERS.has(ids[0]);
-  return (carrier && ids.find(id => !CARRIERS.has(id) && itemById[id] && !isSurface(id))) || ids[0] || null;
+  if (ids[0] === "walls" && ids.length > 1) { ids.shift(); dist.shift(); } // окно и батарея в стене важнее самой стены
+  // мелочь ЗА стеклом витрины или дверцей шкафа важнее самой мебели: луч сначала упирается в стекло.
+  // Берём только то, что стоит внутри (рядом по лучу и не на полу) — иначе клик по мебели уходил ковру под ней
+  if (ids[0] && CARRIERS.has(ids[0])) {
+    const i = ids.findIndex((id, k) => k > 0 && dist[k] - dist[0] < 0.5 && !CARRIERS.has(id) && itemById[id] && !isSurface(id) && items[id] && items[id].position.y > 0.05);
+    if (i > 0) return ids[i];
+  }
+  return ids[0] || null;
 }
 let lastHit = null;
-const CARRIERS = new Set(["stenka", "tumba", "table", "desk", "bossdesk", "tumbochka", "shkaf", "ctable", "walls"]);
+// столы и тумбы сюда не входят: то, что на них лежит, луч и так встречает первым
+const CARRIERS = new Set(["stenka", "shkaf", "walls"]);
 // граффити на голых стенах: рисунок в точке клика, копятся; под обоями не видно
 function drawGraffiti(kind, hit = lastHit) {
   if (!hit || !hit.object.userData.spray) return null;
@@ -237,7 +275,7 @@ renderer.domElement.addEventListener("pointerup", e => {
   hidePie();
   if (id === "walls") { drawGraffiti(); return; }
   if (id === "window") { // своё окно-покупка → меню, хрущёвка напротив → реплика
-    if (windowGroup.userData.item) showPie(windowGroup.userData.item, e.clientX, e.clientY); else { A.blip(900, 0.04); toast(t("window.khrushchev")); }
+    if (windowGroup.userData.item) showPie(windowGroup.userData.item, e.clientX, e.clientY); else { A.blip(900, 0.04); A.duck(6); toast(t("window.khrushchev")); }
     return;
   }
   if (id === "radiator") {
@@ -259,7 +297,7 @@ function action(id) {
   const say = () => toast(t(`item.${id}.say`));
   switch (id) {
     case "tv": return openTV();
-    case "radiola": { const on = A.radio(); toast(t(on ? "item.radiola.say.on" : "item.radiola.say.off")); MAT.dial.color.set(on ? 0xffffff : 0xb8a888); items.radiola.userData.setPlaying(on); break; }
+    case "radiola": { const on = A.deviceToggle("radiola"); devicesShow(); toast(t(on ? "item.radiola.say.on" : "item.radiola.say.off")); break; }
     case "vympel": A.rimshot(); break;
     case "fish": A.bloop(); say(); break;
     case "mug": A.dzyn(); A.sip(); say(); break;
@@ -291,7 +329,7 @@ function action(id) {
     case "tarantul": A.spider(); pets.act(id, "pet"); say(); break;
     case "mihalych": A.beaverPet(); pets.act(id, "pet"); say(); break;
     // Разгул капитализма
-    case "audio": { const on = A.radio(); if (on) A.sparkle(); toast(t(on ? "item.audio.say.on" : "item.audio.say.off")); break; }
+    case "audio": { const on = A.deviceToggle("audio"); devicesShow(); if (on) A.sparkle(); toast(t(on ? "item.audio.say.on" : "item.audio.say.off")); break; }
     case "brain": A.brain(); say(); break;
     case "bossdesk": A.knock(); say(); break;
     case "goldchair": A.creak(); say(); break;
@@ -300,7 +338,7 @@ function action(id) {
     case "rug_lux": case "leopard": case "pinkrug": A.rug(); say(); break;
     case "square": A.ahem(); say(); break;
     case "croc": items.croc.userData.mouth(); A.growl(); say(); break;
-    case "yeltsin": A.ahem(); say(); break;
+    case "yeltsin": A.yeltsin(); say(); break;
     case "safe": A.safe(); say(); break;
     case "ruble": A.sparkle(); say(); break;
     // Неформал 2003
@@ -309,7 +347,7 @@ function action(id) {
     case "pufik": A.beanbag(); say(); break;
     case "desk": A.knock(); say(); break;
     case "pc": { const m = pcScreen.toggle(); if (m === "desktop") A.boot(); else A.modem(); toast(t(m === "desktop" ? "item.pc.say.on" : "item.pc.say.off")); break; }
-    case "music": { A.cdtray(); const on = A.radio(); toast(t(on ? "item.music.say.on" : "item.music.say.off")); break; }
+    case "music": { A.cdtray(); const on = A.deviceToggle("music"); devicesShow(); toast(t(on ? "item.music.say.on" : "item.music.say.off")); break; }
     case "cdtower": A.page(); say(); break;
     case "rug_egypt": A.rug(); say(); break;
     case "pad": A.blip(900, 0.04); say(); break;
@@ -317,7 +355,7 @@ function action(id) {
     case "cool": A.page(); say(); break;
     case "skate": A.skate(); say(); break;
     default:
-      if (itemById[id].slot === "window") { A.blip(1100, 0.05); say(); }
+      if (itemById[id].slot === "window") { A.blip(1100, 0.05); A.duck(8); say(); }
       else if (itemById[id].slot === "radiator") { if (id === "rad_iron") A.metal(); else A.sparkle(); say(); }
   }
 }
@@ -340,15 +378,17 @@ function applyChannel() {
   if (c === "bars") A.tone(1000, 0.4);
 }
 function openTV() {
-  openTray(false); zoom.hidden = false; ch = 0; A.tvon(); applyChannel();
+  openTray(false); zoom.hidden = false; ch = 0; A.tvon(); A.tvMode(true); applyChannel();
   if (!st.watched) { st.watched = true; placeAll(); updateUI(); }
 }
-function closeTV() { zoom.hidden = true; if (noiseRAF) cancelAnimationFrame(noiseRAF); noiseRAF = null; A.hissOff(); }
+function closeTV() { if (!zoom.hidden) A.tvMode(false); zoom.hidden = true; if (noiseRAF) cancelAnimationFrame(noiseRAF); noiseRAF = null; A.hissOff(); }
 screenEl.addEventListener("click", () => { ch = (ch + 1) % CHANNELS.length; screenEl.animate([{ filter: "brightness(3)" }, { filter: "brightness(1)" }], { duration: 140 }); A.tvknob(); applyChannel(); });
 $("tvz-close").addEventListener("click", closeTV);
 addEventListener("keydown", e => { if (e.key === "Escape") { closeTV(); hidePie(); closeDialog(); openTray(false); } });
 
 // ---------- Миниатюры для каталога (рендер тех же моделей) ----------
+// те же модели потом прогревают шейдеры основной сцены (warm): первая покупка не ждёт компиляции
+const warm = new THREE.Scene();
 {
   const tr = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
   tr.setSize(160, 160); tr.toneMapping = THREE.ACESFilmicToneMapping;
@@ -375,7 +415,7 @@ addEventListener("keydown", e => { if (e.key === "Escape") { closeTV(); hidePie(
     Object.assign(tc, { left: -r, right: r, top: r, bottom: -r }); tc.updateProjectionMatrix();
     tr.render(ts, tc);
     thumbs[it.id] = tr.domElement.toDataURL("image/png");
-    ts.remove(g);
+    ts.remove(g); g.traverse(o => { if (o.isLight) o.visible = false; }); warm.add(g);
   }
   tr.dispose();
 }
@@ -414,12 +454,15 @@ function loop(now) {
     scrCtx.beginPath(); scrCtx.roundRect(0, 0, 128, 100, [14]); scrCtx.fill();
     scrCtx.globalCompositeOperation = "source-over";
     T.screen.needsUpdate = true;
-    tvLight.intensity = 0.9 + Math.random() * 0.6;
+    tvLight.intensity = 1.9 + Math.random() * 1.1;
   }
   if (tvGlow.visible) {
     const call = st.watched ? 0 : 0.5 + 0.5 * Math.sin(now / 520); // пока не смотрели — зовёт
-    tvGlow.material.opacity = 0.6 + 0.2 * Math.sin(now / 900) + (tvLight.intensity - 1.2) * 0.15 + call * 0.35;
-    const k = 1 + call * 0.12; tvGlow.scale.set(1.5 * k, 1.25 * k, 1);
+    const flick = (tvLight.intensity - 2.4) / 1.1; // мерцание экрана −0.5…0.5
+    tvGlow.material.opacity = 0.75 + 0.15 * Math.sin(now / 900) + flick * 0.2 + call * 0.3;
+    const k = 1 + call * 0.15; tvGlow.scale.set(1.7 * k, 1.4 * k, 1);
+    tvWall.material.opacity = 0.8 + flick * 0.25 + call * 0.25; tvWall.scale.setScalar(1 + call * 0.1);
+    tvFloor.material.opacity = 0.7 + flick * 0.3 + call * 0.3;
     tvWarm.intensity = 0.5 + call * 0.9;
   } else tvWarm.intensity = 0;
   // пылинки: броуновское блуждание + медленное оседание и лёгкий сквозняк; вылетела из луча — появляется с другой стороны
@@ -439,6 +482,7 @@ function loop(now) {
     }
     dp.needsUpdate = dc.needsUpdate = true;
   }
+  lampsTick();
   room.tick(now);
   pets.tick(now);
   if (items.pc) pcScreen.tick(now);
@@ -450,14 +494,29 @@ function loop(now) {
 updateUI(); placeAll();
 $("loading").classList.add("gone");
 requestAnimationFrame(loop);
+// шейдеры всех предметов — под свет и тени основной сцены, в фоне
+// и заодно загрузить в видеопамять общие фото-текстуры (иначе первая покупка ковра ждёт загрузки картинки на GPU)
+setTimeout(() => {
+  const surf = room.preload(warm);
+  renderer.compileAsync(warm, camera, scene).catch(() => {}).finally(() => {
+    const tex = new Set(surf);
+    warm.traverse(o => { if (!o.material) return; [].concat(o.material).forEach(m => ["map", "normalMap", "roughnessMap", "alphaMap", "emissiveMap"].forEach(k => m[k] && tex.add(m[k]))); });
+    tex.forEach(t => { if (t.image && (t.image.width || t.image.videoWidth)) renderer.initTexture(t); });
+    // шейдеры теней compileAsync не собирает — один кадр тени от всех моделей на слое 1 (камера его не видит)
+    warm.traverse(o => o.layers.set(1)); warm.position.copy(sun.target.position);
+    sun.shadow.camera.layers.enable(1); scene.add(warm); renderer.render(scene, camera);
+    scene.remove(warm); sun.shadow.camera.layers.disable(1);
+    warm.clear();
+  });
+}, 300);
 setTimeout(() => toast(st.test ? t("test.on") : t("ui.start", { n: fmt(st.money) })), 400);
 A.setClockGetter(() => has("clock"));
 window.__st = st; // для отладки
 // крупный план для отладки: __dbg.focus("croc", 0.6) — камера на предмет, полуширина кадра 0.6 м; focus() — назад
 function focus(id, half = 0.7) {
-  const c = id ? new THREE.Box3().setFromObject(items[id]).getCenter(new THREE.Vector3()) : TARGET;
+  const c = id ? new THREE.Box3().setFromObject(id === "window" ? windowGroup : items[id]).getCenter(new THREE.Vector3()) : TARGET;
   camera.position.copy(c).addScaledVector(ISO, 20); camera.lookAt(c);
   if (!id) { resize(); return; }
   const a = innerWidth / innerHeight; Object.assign(camera, { left: -half * a, right: half * a, top: half, bottom: -half }); camera.updateProjectionMatrix();
 }
-window.__dbg = { screenOf: id => { const v = new THREE.Box3().setFromObject(items[id]).getCenter(new THREE.Vector3()).project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight]; }, focus, clashes: () => clashes(st.owned), graffiti: (kind, u = 0.5, v = 0.55) => drawGraffiti(kind, { object: room.pickables[0], uv: { x: u, y: v } }), comet: space.cometNow, plane: room.planeNow, act: action, items, pets, SLOTS, QUESTIONS };
+window.__dbg = { renderer, camera, screenOf: id => { const v = new THREE.Box3().setFromObject(items[id]).getCenter(new THREE.Vector3()).project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight]; }, focus, clashes: () => clashes(st.owned), graffiti: (kind, u = 0.5, v = 0.55) => drawGraffiti(kind, { object: room.pickables[0], uv: { x: u, y: v } }), comet: space.cometNow, plane: room.planeNow, act: action, items, pets, SLOTS, QUESTIONS };

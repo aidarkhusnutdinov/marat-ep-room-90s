@@ -218,8 +218,17 @@ export function buildRoom(scene, T, opts) {
       radiator.userData.item = id || null;
     }
   }
+  // заранее: собрать текстуры всех поверхностей (паркет «ёлочкой» собирается из фото долго) и отдать в warm-сцену
+  // образцы материалов, которых ещё нет в комнате (пол с нормалью и шероховатостью, золотая и чугунная батареи)
+  function preload(warm) {
+    Object.values(itemById).filter(it => ["floor", "walls", "window"].includes(it.slot)).forEach(it => surfaceTex(it.id, T));
+    const d = new THREE.CanvasTexture(Object.assign(document.createElement("canvas"), { width: 4, height: 4 }));
+    warm.add(new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshStandardMaterial({ map: d, normalMap: d, roughnessMap: d })));
+    Object.keys(RADIATORS).forEach(id => { const r = RADIATORS[id](T); r.traverse(o => { if (o.isMesh) o.castShadow = o.receiveShadow = true; }); warm.add(r); });
+    return Object.values(cache);
+  }
   return {
-    windowGroup, radiator, applySurface, spray, pickables: [sprayBack, sprayLeft],
+    windowGroup, radiator, applySurface, spray, preload, pickables: [sprayBack, sprayLeft],
     tick(now) { if (layer.tick(now)) layerTex.needsUpdate = true; tickSpray(now); },
     planeNow: layer.planeNow,
   };

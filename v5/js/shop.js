@@ -5,6 +5,7 @@ import { CATALOG, itemById, SLOTS, SURFACES, sizeOf, nameOf } from "./catalog.js
 import { t, cfg } from "./texts.js";
 import * as A from "./audio.js";
 import { toast, fmt } from "./ui.js";
+import { layout } from "./models/index.js";
 
 const ownedIn = slot => Object.keys(st.owned).filter(id => itemById[id].slot === slot); // в порядке покупки
 const usedIn = slot => ownedIn(slot).reduce((s, id) => s + sizeOf(id), 0);
@@ -97,7 +98,7 @@ export function buy(id, quiet) {
   if (st.deals[id] && st.deals[id].kind !== "angry") delete st.deals[id];
   if (id === "pss") msg = t("item.pss.bought");
   if (id === "tv") msg = has("tumba") ? t("tv.on.tumba") : t("tv.on.floor");
-  if (["bust", "pss", "fish"].includes(id) && !has("stenka")) msg = (msg ? msg + " " : "") + t("item.bust.nostenka");
+  if (["bust", "pss", "fish"].includes(id) && !has("stenka") && layout(id, st.owned)[1] === 0) msg = (msg ? msg + " " : "") + t("item.bust.nostenka");
   st.money -= paid; st.owned[id] = paid;
   emit("add", id);
   if (!quiet) { A.thunk(); A.coins(); if (msg) toast(msg); }

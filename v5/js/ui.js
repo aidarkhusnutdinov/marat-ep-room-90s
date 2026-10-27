@@ -121,10 +121,13 @@ export function openTray(on) {
 // ---------- Круговое меню ----------
 let pieExtras = () => [];
 export const setPieExtras = f => { pieExtras = f; };
+// подпись главного действия может зависеть от состояния предмета: «Включить» ↔ «Выключить»
+let actLabel = actOf;
+export const setActLabel = f => { actLabel = f; };
 export function showPie(id, x, y) {
   const pie = $("pie");
   A.blip(1500, 0.03);
-  const opts = [{ t: actOf(id), a: () => actionHandler(id) }, ...pieExtras(id), { t: t("ui.sell", { price: st.owned[id] }), a: () => sell(id), cls: "sell" }];
+  const opts = [{ t: actLabel(id), a: () => actionHandler(id) }, ...pieExtras(id), { t: t("ui.sell", { price: st.owned[id] }), a: () => sell(id), cls: "sell" }];
   // пункты столбиком прямо под курсором (название — чуть выше), чтобы не тянуться мышкой
   const list = opts.slice(0, 5), STEP = 32, Y0 = 14;
   pie.innerHTML = `<div class="center" style="top:-24px">${nameOf(id)}</div>` + list.map((o, i) =>
@@ -191,8 +194,8 @@ export function initUI() {
   $("btn-buy").addEventListener("click", () => { A.blip(900, 0.04); openTray($("tray").hidden); });
   $("tray-close").addEventListener("click", () => openTray(false));
   $("btn-sound").addEventListener("click", () => { const m = A.toggleMute(); $("btn-sound").textContent = m ? "🔇" : "🔊"; });
-  const musicBtn = () => { $("btn-music").classList.toggle("off", !A.isShopMusic()); };
-  $("btn-music").addEventListener("click", () => { const m = A.toggleShopMusic(); musicBtn(); toast(t(m ? "ui.music.on" : "ui.music.off")); });
+  const musicBtn = () => { $("btn-music").classList.toggle("off", !A.isMusic()); };
+  $("btn-music").addEventListener("click", () => { const m = A.toggleMusic(); musicBtn(); toast(t(m ? "ui.music.on" : "ui.music.off")); });
   musicBtn();
   const sfxBtn = () => { $("btn-sfx").textContent = A.isLive() ? "🎙" : "🎹"; };
   $("btn-sfx").addEventListener("click", () => { const l = A.toggleLive(); sfxBtn(); toast(t(l ? "ui.sfx.live" : "ui.sfx.synth")); });
@@ -206,7 +209,9 @@ export function initUI() {
   $("test-all").addEventListener("click", testBuyAll);
   $("test-clear").addEventListener("click", () => { sellAll(); toast(t("ui.reset")); });
 
-  on("change", updateUI);
+  // набор падает по предмету — каталог перерисовываем раз в кадр, а не на каждый
+  let uiQueued = false;
+  on("change", () => { if (!uiQueued) { uiQueued = true; requestAnimationFrame(() => { uiQueued = false; updateUI(); }); } });
   on("nospace", noSpace);
   on("nomoney", noMoney);
 }

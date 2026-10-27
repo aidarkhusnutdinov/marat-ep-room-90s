@@ -6,6 +6,7 @@ import { M, mesh, rbox, box, cyl, photoPlane, rugWave } from "./kit.js";
 
 const std = o => new THREE.MeshStandardMaterial(o);
 const gloss = c => new THREE.MeshPhysicalMaterial({ color: c, roughness: 0.25, clearcoat: 0.8 });
+const sm = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 let MAT = null;
 function mats() {
   if (MAT) return MAT;
@@ -71,24 +72,70 @@ export const pcScreen = (() => {
 export const NEFORMAL = {
   // жёлто-синий шкаф-купе на четыре двери
   shkaf() {
-    const m = mats(), g = new THREE.Group(), W = 2.0, H = 2.15, D = 0.58;
-    mesh(box(W, H, D - 0.04), m.white, 0, H / 2, -0.02, g);
+    // корпус полый (раньше был сплошной брус — вещи прятались внутри него). Двери-купе на двух направляющих,
+    // ручка — вертикальный алюминиевый профиль во всю высоту двери, как у настоящих купе; сверху и снизу — рельсы
+    const m = mats(), g = new THREE.Group(), W = 2.0, H = 2.15, D = 0.58, Z0 = -D / 2, inner = std({ color: 0xe4e2da, roughness: 0.6 });
+    const alu = new THREE.MeshPhysicalMaterial({ color: 0xc9ccd0, metalness: 0.85, roughness: 0.28, clearcoat: 0.3 });
+    mesh(box(W, H, 0.02), inner, 0, H / 2, Z0 + 0.01, g);                                           // задняя стенка
+    [-1, 1].forEach(sd => mesh(box(0.02, H, D - 0.04), m.white, sd * (W / 2 - 0.01), H / 2, -0.02, g)); // боковины
+    mesh(box(W + 0.02, 0.05, D), m.white, 0, H - 0.025, 0, g);                                      // крыша
+    mesh(box(W, 0.06, D - 0.04), m.white, 0, 0.03, -0.02, g);                                       // цоколь
+    const w = (W - 0.04) / 4, secX = i => -W / 2 + 0.02 + i * w + w / 2;
+    [0, 0.49].forEach(x0 => mesh(box(0.018, H - 0.11, D - 0.08), inner, x0, H / 2, -0.04, g));     // перегородки
+    // рельсы купе сверху и снизу во всю ширину
+    [[H - 0.06, 0.035], [0.075, 0.03]].forEach(([y, h]) => mesh(box(W - 0.02, h, 0.075), alu, 0, y, D / 2 - 0.035, g));
     const doors = [m.yellow, m.blue, m.yellow, m.blue].map((mt, i) => {
-      const x0 = -W / 2 + 0.02 + i * (W - 0.04) / 4, w = (W - 0.04) / 4, d = new THREE.Group(); d.position.set(x0 + w / 2, 0, i % 2 ? D / 2 - 0.02 : D / 2 - 0.045); g.add(d);
-      mesh(rbox(w - 0.01, H - 0.12, 0.02, 0.004), mt, 0, H / 2, 0, d);
-      mesh(box(0.015, 0.5, 0.02), M.chrome, (i % 2 ? 0.05 : w - 0.05) - w / 2, H / 2, 0.012, d);
+      const d = new THREE.Group(); d.position.set(secX(i), 0, i % 2 ? D / 2 - 0.018 : D / 2 - 0.05); g.add(d);
+      mesh(rbox(w - 0.03, H - 0.16, 0.018, 0.003), mt, 0, H / 2, 0, d);
+      // рамка из профиля: вертикальные стойки-ручки по обоим краям (рельеф под пальцы) + горизонтальные планки
+      [-1, 1].forEach(sd => {
+        mesh(rbox(0.026, H - 0.13, 0.034, 0.006), alu, sd * (w / 2 - 0.013), H / 2, 0.004, d);
+        mesh(box(0.008, H - 0.3, 0.006), M.blackRim, sd * (w / 2 - 0.016), H / 2, 0.022, d); // паз-захват
+      });
+      [0.1, H - 0.08].forEach(y => mesh(box(w - 0.02, 0.022, 0.026), alu, 0, y, 0.002, d));
       d.userData.x = d.position.x; d.userData.w = w; return d;
     });
-    // внутри купе: штанга с вещами неформала — косуха, худи, футболка с черепом
-    mesh(cyl(0.01, 0.01, W - 0.1, 8), M.chrome, 0, H - 0.3, 0, g).rotation.z = Math.PI / 2;
-    [[0x151515, 0.5], [0x5a2a8a, 0.6], [0x2a2a2a, 0.55], [0xd8302a, 0.5], [0x1d3a6a, 0.6]].forEach(([c, h], i) => mesh(box(0.06, h + 0.3, 0.38), std({ color: c, roughness: 1 }), -0.7 + i * 0.12, H - 0.3 - (h + 0.3) / 2, 0, g));
-    mesh(box(W + 0.02, 0.05, D), m.white, 0, H - 0.025, 0, g);
-    mesh(box(W, 0.06, D - 0.04), m.white, 0, 0.03, -0.02, g);
-    // «Открыть»: синяя дверь-купе уезжает за жёлтую, видно вешалку
-    g.userData.act = play => play(2200, p => { const q = p < 0.3 ? p / 0.3 : p > 0.75 ? (1 - p) / 0.25 : 1; doors[1].position.x = doors[1].userData.x - q * doors[1].userData.w * 0.95; });
+    // секция за синей дверью №2: штанга с вещами неформала и лыжи с палками у перегородки
+    const s1 = secX(1);
+    mesh(cyl(0.01, 0.01, w - 0.04, 8), M.chrome, s1, H - 0.3, -0.04, g).rotation.z = Math.PI / 2;
+    [[0x151515, 0.5], [0x5a2a8a, 0.6], [0x2a2a2a, 0.55]].forEach(([c, h], i) => {
+      const hang = new THREE.Group(); hang.position.set(s1 - 0.06 + i * 0.09, H - 0.3, -0.06); g.add(hang);
+      mesh(new THREE.TorusGeometry(0.012, 0.003, 6, 10, Math.PI * 1.4), M.chrome, 0, 0.005, 0, hang);
+      mesh(box(0.42, 0.02, 0.012), std({ color: 0x8a6a42, roughness: 0.7 }), 0, -0.04, 0, hang).rotation.y = Math.PI / 2;
+      mesh(rbox(0.07, h + 0.3, 0.4, 0.02), std({ color: c, roughness: 1 }), 0, -0.05 - (h + 0.3) / 2, 0, hang);
+    });
+    const ski = new THREE.Group(); ski.position.set(s1 - 0.17, 0.07, 0.06); ski.rotation.x = -0.1; g.add(ski);
+    const skiMat = [gloss(0xff3a6a), std({ color: 0xf4f4f0, roughness: 0.5 })];
+    [-0.045, 0.045].forEach((dx, k) => {
+      mesh(rbox(0.07, 1.72, 0.014, 0.006), skiMat[0], dx, 0.86, 0, ski);
+      mesh(box(0.071, 0.5, 0.0145), skiMat[1], dx, 0.55, 0.0005, ski);                           // белая вставка с «логотипом»
+      const tip = mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.07, 12, 1, true, 0, Math.PI / 2), skiMat[0], dx, 1.72, -0.035, ski);
+      tip.rotation.z = Math.PI / 2; tip.material = skiMat[0];
+      mesh(box(0.08, 0.05, 0.05), M.blackRim, dx, 0.82, 0.03, ski);                                 // крепление
+    });
+    [-0.11, 0.11].forEach(dz => {                                                                   // палки
+      const pole = mesh(cyl(0.007, 0.007, 1.3, 6), M.chrome, s1 - 0.08 + dz * 0.3, 0.72, 0.1 + dz * 0.2, g); pole.rotation.z = dz;
+      mesh(new THREE.TorusGeometry(0.03, 0.004, 5, 14), M.blackRim, s1 - 0.08 + dz * 0.3 + Math.sin(dz) * 0.5, 0.17, 0.1 + dz * 0.2, g).rotation.x = Math.PI / 2;
+    });
+    // секция за синей дверью №4: полки — свитера стопкой, коробка из-под кроссовок, диски, бейсболка
+    const s3 = secX(3);
+    [0.55, 1.05, 1.55].forEach(y => mesh(box(w - 0.03, 0.018, D - 0.1), inner, s3, y, -0.04, g));
+    [0x2a2a2a, 0x1d3a6a, 0xd8302a].forEach((c, i) => mesh(rbox(0.32, 0.06, 0.3, 0.02), std({ color: c, roughness: 1 }), s3 - 0.02, 1.09 + i * 0.062, -0.05, g));
+    mesh(box(0.34, 0.13, 0.22), std({ color: 0xf2f2ee, roughness: 0.6 }), s3, 0.63, -0.04, g);
+    mesh(box(0.35, 0.02, 0.23), std({ color: 0x1a1a1a, roughness: 0.6 }), s3, 0.7, -0.04, g);
+    for (let i = 0; i < 6; i++) mesh(box(0.012, 0.125, 0.14), std({ color: [0xd8302a, 0x111111, 0x2ea84a, 0xf2c230, 0x8a3cc8, 0x2a59c8][i], roughness: 0.4 }), s3 - 0.15 + i * 0.016, 1.63, -0.04, g);
+    const cap = new THREE.Group(); cap.position.set(s3 + 0.08, 1.58, -0.04); g.add(cap);
+    mesh(new THREE.SphereGeometry(0.075, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2), std({ color: 0x111111, roughness: 0.9 }), 0, 0, 0, cap);
+    mesh(box(0.1, 0.006, 0.08), std({ color: 0x111111, roughness: 0.9 }), 0.0, 0.003, 0.09, cap);
+    mesh(box(0.5, 0.012, 0.012), M.chrome, s3, 0.3, D / 2 - 0.12, g);
+    // «Открыть»: синие двери по очереди уезжают за жёлтые — сначала вешалка с лыжами, потом полки
+    g.userData.act = play => play(3600, p => {
+      const a = sm(0, 0.18, p) * (1 - sm(0.42, 0.55, p)), b = sm(0.45, 0.62, p) * (1 - sm(0.85, 1, p));
+      doors[1].position.x = doors[1].userData.x - a * w * 0.96;
+      doors[3].position.x = doors[3].userData.x - b * w * 0.96;
+    });
     return g;
   },
-  // шведская стенка: белые стойки, разноцветные перекладины, турник с кольцами и верёвочная лестница
   shved() {
     const m = mats(), g = new THREE.Group(), H = 2.3, W = 0.8;
     const rung = [m.red, M.yellow, m.green, m.blue];

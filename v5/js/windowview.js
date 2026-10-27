@@ -201,21 +201,25 @@ export function createViewLayer(opts) {
         }
       }
     }
-    if (!flight && now > nextPlane) { flight = { t0: now, dur: rnd(8000, 10000), dir: Math.random() < 0.5 ? 1 : -1, y: rnd(50, 120) }; opts.onPlane && opts.onPlane(); }
+    // самолёт летит прямо перед окном: крупно (S), в нижней половине — под горизонтальной перекладиной рамы
+    // (она на 30% от верха, ≈ y 115), чтобы баннер с лицом и надписью читался в любом виде. Тонкие вертикальные
+    // стойки рамы баннер проезжает насквозь — читать не мешают.
+    if (!flight && now > nextPlane) { flight = { t0: now, dur: rnd(11000, 13000), dir: Math.random() < 0.5 ? 1 : -1, y: rnd(218, 238) }; opts.onPlane && opts.onPlane(); }
     if (flight) {
       const p = (now - flight.t0) / flight.dur;
       if (p >= 1) { flight = null; nextPlane = now + rnd(60000, 120000); }
       else {
-        const b = ready(), d = flight.dir, span = VW + 40 + b.width + 80;
-        const px = d > 0 ? -40 + p * span : VW + 40 - p * span, py = flight.y + Math.sin(t * 1.5) * 4;
-        plane(x, px, py, d, t);
+        const S = 1.75, b = ready(), d = flight.dir, bw = b.width * S, bh = b.height * S, gap = 95 * S;
+        const span = VW + 70 * S + bw + gap;
+        const px = d > 0 ? -60 * S + p * span : VW + 60 * S - p * span, py = flight.y + Math.sin(t * 1.5) * 3;
+        x.save(); x.translate(px, py); x.scale(S, S); plane(x, 0, 0, d, t); x.restore();
         // трос и баннер позади самолёта, полосами с волной
-        const bx = d > 0 ? px - 40 - 60 - b.width : px + 40 + 60;
-        x.strokeStyle = "#555"; x.lineWidth = 1; x.beginPath(); x.moveTo(px - d * 34, py); x.lineTo(d > 0 ? bx + b.width : bx, py); x.stroke();
+        const bx = d > 0 ? px - gap - bw : px + gap;
+        x.strokeStyle = "#555"; x.lineWidth = 1.5; x.beginPath(); x.moveTo(px - d * 34 * S, py); x.lineTo(d > 0 ? bx + bw : bx, py); x.stroke();
         for (let s = 0; s < b.width; s += 8) {
           const sx = d > 0 ? s : b.width - 8 - s;
-          const wave = Math.sin(t * 6 + s * 0.04) * 3 * (s / b.width);
-          x.drawImage(b, sx, 0, 8, b.height, bx + sx, py - b.height / 2 + wave, 8.6, b.height);
+          const wave = Math.sin(t * 5 + s * 0.04) * 4 * (s / b.width);
+          x.drawImage(b, sx, 0, 8, b.height, bx + sx * S, py - bh / 2 + wave, 8.6 * S, bh);
         }
       }
     }

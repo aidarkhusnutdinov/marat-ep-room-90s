@@ -109,8 +109,11 @@ export const PETS = {
     mesh(new THREE.SphereGeometry(0.02, 8, 6), std({ color: 0xd86a7a, roughness: 0.6 }), 0.12, -0.07, 0, head).scale.set(1, 0.4, 0.8); // язык
     [-1, 1].forEach(s => furry(head, sph(0.04), G, TIP, -0.01, -0.01, s * 0.085, { sx: 0.55, sy: 1.5, sz: 0.4, len: 0.3, shells: 6 }));
     const ey = eyes(head, 0x3a2410, 0.07, 0.03, 0.035, 0.011);
-    const tail = new THREE.Group(); tail.position.set(-0.27, 0.31, 0); b.add(tail);
-    furry(tail, sph(0.04), G, TIP, -0.05, 0.04, 0, { sx: 1.7, sy: 0.75, sz: 0.75, len: 0.4, shells: 7 });
+    // хвост растёт из крупа: основание утоплено в тело (раньше висел над ним отдельно), сам хвост задран вверх
+    const tail = new THREE.Group(); tail.position.set(-0.215, 0.3, 0); b.add(tail);
+    furry(tail, sph(0.035), G, TIP, -0.015, 0.0, 0, { sx: 1.1, sy: 1, sz: 1, len: 0.3, shells: 6 });
+    const tailUp = new THREE.Group(); tailUp.rotation.z = -0.7; tail.add(tailUp);
+    furry(tailUp, sph(0.04), G, TIP, -0.06, 0, 0, { sx: 1.75, sy: 0.72, sz: 0.72, len: 0.4, shells: 7 });
     const legs = [[0.15, 1], [0.15, -1], [-0.15, 1], [-0.15, -1]].map(([x0, s]) => {
       const l = leg(b, m, x0, s * 0.07, 0.17, 0.032);
       furry(l, new THREE.CylinderGeometry(0.03, 0.026, 0.14, 10), G, TIP, 0, -0.07, 0, { len: 0.35, shells: 5 });

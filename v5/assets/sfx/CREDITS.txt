@@ -72,3 +72,5 @@ tvon: «CRT TV Switches On» — Fission9, https://freesound.org/people/Fission9
 water: «Water pouring; quick_1-2.aif» — domrodrig, https://freesound.org/people/domrodrig/sounds/119113/ (http://creativecommons.org/publicdomain/zero/1.0/)
 woof: «WoofBig2.wav» — Wdomino, https://freesound.org/people/Wdomino/sounds/517132/ (http://creativecommons.org/publicdomain/zero/1.0/)
 wrong: «Wrong Answer Buzzer» — -Andreas, https://freesound.org/people/-Andreas/sounds/650842/ (http://creativecommons.org/publicdomain/zero/1.0/)
+yeltsin1–5: Б. Н. Ельцин, новогоднее обращение 31.12.1999 — Пресс-служба Администрации Президента РФ, https://commons.wikimedia.org/wiki/File:Борис_Николаевич_Ельцин_Новогоднее_обращение_к_народу_1999_г.ogg (CC BY 4.0), фрагменты
+yeltsin_s1–3: синтез речи macOS (голос Milena), понижен и замедлен — для сравнения

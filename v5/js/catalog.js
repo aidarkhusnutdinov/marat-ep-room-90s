@@ -58,7 +58,7 @@ export const CATALOG = [
   { id: "mug", set: "ussr", cat: "decor", price: 10, slot: "small" },
   { id: "vympel", set: "ussr", cat: "ideo", price: 40, slot: "poster" },
   { id: "bust", set: "ussr", cat: "ideo", price: 120, slot: "small" },
-  { id: "pss", set: "ussr", cat: "ideo", price: 150, slot: "small", deficit: true },
+  { id: "pss", set: "ussr", cat: "ideo", price: 150, slot: "small" },
 
   // ---------- Неформал 2003 ----------
   { id: "pc", set: "neformal", cat: "tech", price: 433, slot: "pcSpot" },

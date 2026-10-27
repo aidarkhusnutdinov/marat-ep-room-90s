@@ -8,7 +8,8 @@ function hinged(g, x0, x1, y0, y1, z, mat, handleX, hingeLeft) {
   door(piv, x0 - hx, x1 - hx, y0, y1, 0, mat, handleX - hx);
   piv.userData.sign = hingeLeft ? -1 : 1; return piv;
 }
-const swing = (d, q) => { d.rotation.y = d.userData.sign * -q * 1.6; };
+// дверца открывается наружу, к нам (+z): левая петля — поворот по часовой, правая — против
+const swing = (d, q) => { d.rotation.y = d.userData.sign * q * 1.6; };
 // пыль облачком (выбить ковёр): спрайты разлетаются и тают
 let dustTex = null;
 function dustCloud(g, n, at, spread) {

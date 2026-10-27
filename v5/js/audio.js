@@ -1,6 +1,7 @@
 // Звук: живые записи из assets/sfx (Freesound, CC0) или синтез Web Audio — переключается кнопкой 🎙.
-// Синтез остаётся запасным вариантом для каждого эффекта. Лаунж — только синтез.
-let AC = null, master = null, sfx = null, musicBus = null, muted = false, hissNode = null;
+// Синтез остаётся запасным вариантом для каждого эффекта. Музыка — лупы Марата «Не похож» (assets/music).
+import { cfg } from "./texts.js";
+let AC = null, master = null, sfx = null, musicBus = null, ambBus = null, muted = false, hissNode = null;
 let clockOn = () => false, ambNode = null;
 export const setClockGetter = f => { clockOn = f; };
 
@@ -9,7 +10,8 @@ function ac() {
     AC = new (window.AudioContext || window.webkitAudioContext)();
     master = AC.createGain(); master.gain.value = 0.7; master.connect(AC.destination);
     sfx = AC.createGain(); sfx.connect(master);
-    musicBus = AC.createGain(); musicBus.gain.value = 0; musicBus.connect(master);
+    musicBus = AC.createGain(); musicBus.connect(master);
+    ambBus = AC.createGain(); ambBus.gain.value = VOL.amb; ambBus.connect(master); // звуки за окном: приглушаются, когда играет техника
   }
   if (AC.state === "suspended") AC.resume();
   return AC;
@@ -46,7 +48,9 @@ const SAMPLES = ["click", "coins", "sad", "thunk", "rimshot", "bloop", "dzyn", "
   "porcelain", "beanbag", "sparkle", "metal",
   // раунд 2
   "growl", "amb_city", "amb_fire", "amb_square", "amb_parade", "amb_skate", "amb_garages", "amb_beach", "amb_forest",
-  "feed_dog", "feed_turtle", "feed_spider", "beaver_pet", "bugle", "hurrah"];
+  "feed_dog", "feed_turtle", "feed_spider", "beaver_pet", "bugle", "hurrah",
+  // раунд 3
+  "yeltsin5", "yeltsin_s1", "yeltsin_s2", "yeltsin_s3"];
 const buf = {};
 let live = true; try { live = localStorage.getItem("sfx-mode") !== "synth"; } catch (e) {}
 function loadSamples() {
@@ -64,10 +68,10 @@ function play(n, { gain = 0.8, rate = 1, vary = 0.06, loop = false } = {}) {
 // Петля без шва: копии записи идут внахлёст, одна гаснет, другая проявляется (равная мощность).
 const XF = 64, XUP = new Float32Array(XF), XDOWN = new Float32Array(XF);
 for (let i = 0; i < XF; i++) { const p = i / (XF - 1); XUP[i] = Math.sin(p * Math.PI / 2); XDOWN[i] = Math.cos(p * Math.PI / 2); }
-function loopXfade(n, { gain = 0.5, fade = 3 } = {}) {
+function loopXfade(n, { gain = 0.5, fade = 3, bus = sfx } = {}) {
   if (!live || !buf[n]) return null;
   const b = buf[n], x = Math.min(fade, b.duration / 3), out = AC.createGain(), srcs = new Set();
-  out.gain.value = gain; out.connect(sfx);
+  out.gain.value = gain; out.connect(bus);
   let t = now() + 0.05, first = true;
   const one = () => {
     const s = AC.createBufferSource(), g = AC.createGain(); s.buffer = b; s.connect(g).connect(out);
@@ -90,7 +94,7 @@ export function toggleLive() {
 
 export function wake() {
   ac();
-  if (!wake.done) { wake.done = true; loadSamples(); ambience(); }
+  if (!wake.done) { wake.done = true; loadSamples(); loadMusic(); ambience(); }
 }
 // фоновые события (самолёт, скейтер): звучат только после первого клика, иначе браузер ругается на AudioContext
 export const ifAwake = f => { if (wake.done) f(); };
@@ -144,6 +148,16 @@ export function feed(id) {
   munch();
 }
 export function beaverPet() { ac(); if (!play("beaver_pet", { gain: 0.6 })) knock(); }
+// мозаика «Ельцин» говорит. «настоящий» — его голос из новогоднего обращения 31.12.1999 (Wikimedia Commons, CC BY 4.0):
+// оставлена одна фраза — «Я сделал всё, что мог» (yeltsin5); остальные (1–4) лежат в assets/sfx, но не звучат.
+// «синтез» — для сравнения: «э-э-э… понимаешь» синтезом речи macOS с пониженным голосом. Выбор — в настройки.txt
+let yLast = "";
+export function yeltsin() {
+  ac();
+  const synth = cfg("голос ельцина", "настоящий") === "синтез", list = synth ? ["yeltsin_s1", "yeltsin_s2", "yeltsin_s3"] : ["yeltsin5"];
+  let n; do n = list[Math.floor(Math.random() * list.length)]; while (n === yLast && list.length > 1); yLast = n;
+  if (!play(n, { gain: 0.9, vary: 0 })) ahem();
+}
 export function bugle() { ac(); play("bugle", { gain: 0.3, vary: 0.02 }); }
 export function hurrah() { ac(); play("hurrah", { gain: 0.35 }); }
 export function croc() { ac(); if (play("croc", { gain: 0.9, rate: 0.8 })) return; const t = now(); osc("sine", 160, t, 0.6, 0.12, 70); noise(t, 0.06, 0.5, "lowpass", 2500); }
@@ -206,14 +220,15 @@ export function hissOff() {
 // какой фон звучит за окном: голая стена — улица у хрущёвки, у каждого купленного вида — свой
 const VIEW_AMB = { win_green: "ambience", win_fire: "amb_fire", win_mausoleum: "amb_square", win_pioneers: "amb_parade", win_skate: "amb_skate",
   win_garages: "amb_garages", win_beach: "amb_beach", win_borovoe: "amb_forest" };
-const AMB_GAIN = { amb_city: 0.06, amb_fire: 0.09, amb_parade: 0.05, amb_beach: 0.08 };
+// записи за окном тихие (≈ −30 дБ), поэтому множители большие; общий уровень — «звуки за окном» в настройки.txt
+const AMB_GAIN = { amb_city: 0.3, amb_fire: 0.45, amb_parade: 0.25, amb_beach: 0.4 };
 let ambKey = "amb_city";
 export function setView(id) { ambKey = VIEW_AMB[id] || "amb_city"; }
 function ambience() {
   const bird = () => {
     if (!muted && !ambNode) {
       const t = now(), n = 2 + Math.floor(Math.random() * 4), f = 3000 + Math.random() * 1800;
-      for (let i = 0; i < n; i++) osc("sine", f, t + i * 0.11, 0.025, 0.07, f * (1.2 + Math.random() * 0.4));
+      for (let i = 0; i < n; i++) osc("sine", f, t + i * 0.11, 0.025, 0.07, f * (1.2 + Math.random() * 0.4), ambBus);
     }
     setTimeout(bird, 2500 + Math.random() * 6000);
   };
@@ -222,51 +237,109 @@ function ambience() {
     if (clockOn() && !muted && !play("tick", { gain: 0.06, vary: 0.02 })) osc("square", 2400, now(), 0.02, 0.012);
     // фон за окном: своя запись для каждого вида (setView), синтетические птицы — в старом режиме
     if (live && ambNode && ambNode.key !== ambKey) { const old = ambNode; old.g.gain.setTargetAtTime(0, now(), 0.6); setTimeout(() => old.s.stop(), 2500); ambNode = null; }
-    if (live && !ambNode && buf[ambKey]) { ambNode = loopXfade(ambKey, { gain: AMB_GAIN[ambKey] ?? 0.07, fade: 3 }); if (ambNode) ambNode.key = ambKey; }
+    if (live && !ambNode && buf[ambKey]) { ambNode = loopXfade(ambKey, { gain: AMB_GAIN[ambKey] ?? 0.35, fade: 3, bus: ambBus }); if (ambNode) ambNode.key = ambKey; }
     if (!live && ambNode) { ambNode.s.stop(); ambNode = null; }
   }, 1000);
 }
 
-// ---------- Музыка: мягкий лаунж на электропиано ----------
-const midi = n => 440 * Math.pow(2, (n - 69) / 12);
-const PROG = [[53, 57, 60, 64, 67], [52, 55, 59, 62], [50, 53, 57, 60, 64], [43, 53, 57, 59, 64]];
-const BASS = [41, 40, 38, 43];
-const SCALE = [72, 74, 76, 79, 81, 84];
-let musicTimer = null, nextT = 0, step = 0, buyOn = false, radioOn = false;
-let shopMusic = true; try { shopMusic = localStorage.getItem("shop-music") !== "off"; } catch (e) {}
-function ep(f, t, peak, dur) {
-  const o = AC.createOscillator(), o2 = AC.createOscillator();
-  o.type = "sine"; o2.type = "sine"; o.frequency.value = f; o2.frequency.value = f * 2.003;
-  const lp = AC.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 2200;
-  const g2 = AC.createGain(); g2.gain.value = 0.25; o2.connect(g2).connect(lp); o.connect(lp);
-  env(lp, t, peak, dur, musicBus, 0.01); o.start(t); o2.start(t); o.stop(t + dur + 0.1); o2.stop(t + dur + 0.1);
+
+// ---------- Музыка: лупы Марата из «Не похож» (85 bpm, assets/music) ----------
+// Одновременно звучит один луп: техника (радиола, центр, аудиосистема) > покупки > фон. Фон и покупки идут по общей
+// сетке тактов: новый луп вступает на ближайшую долю с того же места в такте — переход звучит как сведение, а не обрыв.
+// Громкости — в настройки.txt (в процентах); фон чуть тише звуков игры, как просил Марат.
+const BEAT = 60 / 85, LOOPS = ["loop1", "loop2", "loop3", "loop4", "loop5", "loop6"];
+// выравниваем громкость лупов между собой (loop5 записан на 8 дБ тише)
+const NORM = { loop4: 0.9, loop5: 2.6, loop6: 1.3 };
+const BED = ["loop2", "loop2", "loop5", "loop5"]; // фон: 16 тактов второго, 8 тактов пятого — и по кругу
+// музыкальный центр: файл из настройки.txt («трек музцентра»), чтобы подложить полный минус без правки кода
+const DEVICE = { radiola: "loop3", audio: "loop4", get music() { return cfg("трек музцентра", "loop1"); } };
+const VOL = {
+  get bed() { return cfg("музыка фоном", 28) / 100; }, get shop() { return cfg("музыка в покупках", 40) / 100; },
+  get device() { return cfg("музыка в технике", 70) / 100; }, get amb() { return cfg("звуки за окном", 100) / 100; },
+};
+const mbuf = {};
+let gridT0 = null, voice = null, bedStep = 0, buyOn = false, device = null, tvOn = false, duckUntil = 0;
+let musicOn = true; try { musicOn = localStorage.getItem("music") !== "off"; } catch (e) {}
+function loadMusic() {
+  [...new Set([...LOOPS, DEVICE.music])].forEach(n => fetch(`assets/music/${n}.mp3`).then(r => r.ok ? r.arrayBuffer() : Promise.reject(n))
+    .then(b => AC.decodeAudioData(b)).then(b => { mbuf[n] = b; musicUpdate(); }).catch(() => {}));
 }
-function schedule() {
-  const beat = 60 / 86;
-  while (nextT < now() + 0.4) {
-    const bar = Math.floor(step / 8) % 4, e = step % 8, t = nextT;
-    if (e === 0 || e === 5) PROG[bar].forEach(n => ep(midi(n), t + Math.random() * 0.02, 0.06, beat * 3));
-    if (e === 0 || e === 4) osc("triangle", midi(BASS[bar] - 12), t, 0.22, beat * 1.6, null, musicBus, 0.01);
-    if (e === 6) osc("triangle", midi(BASS[bar] - 5), t, 0.16, beat * 0.8, null, musicBus, 0.01);
-    if (e % 2 === 1) noise(t, 0.09, 0.05, "highpass", 7000, musicBus);
-    if (Math.random() < 0.32) ep(midi(SCALE[Math.floor(Math.random() * SCALE.length)]), t, 0.05, beat * 1.2);
-    nextT += beat / 2; step++;
+const loopOf = n => mbuf[n] ? n : "loop1";
+// что должно играть сейчас и как громко
+function want() {
+  if (device) return { key: loopOf(DEVICE[device]), gain: VOL.device, sync: false };
+  if (!musicOn || tvOn) return null;
+  if (buyOn) return { key: "loop6", gain: VOL.shop, sync: true };
+  return { key: "bed", gain: VOL.bed, sync: true };
+}
+function startVoice(w) {
+  const key = w.key === "bed" ? BED[bedStep % BED.length] : w.key, b = mbuf[key];
+  if (!b) return null;
+  if (gridT0 == null) gridT0 = now();
+  // с долей: ближайшая доля по общей сетке; луп вступает с того места, где «сейчас» в его такте
+  let when = now() + 0.05, offset = 0;
+  if (w.sync) { const k = Math.ceil((when - gridT0) / BEAT); when = gridT0 + k * BEAT; offset = (when - gridT0) % b.duration; }
+  const s = AC.createBufferSource(), g = AC.createGain();
+  s.buffer = b; s.loop = w.key !== "bed"; s.connect(g).connect(musicBus);
+  g.gain.setValueAtTime(0.0001, when); g.gain.exponentialRampToValueAtTime(w.gain * (NORM[key] || 1), when + 0.6);
+  s.start(when, offset);
+  const v = { s, g, key: w.key, gain: w.gain };
+  // фон — цепочка разных лупов: следующий встык, ровно по окончании этого
+  if (w.key === "bed") {
+    const end = when + b.duration - offset;
+    v.timer = setTimeout(() => { if (voice === v) { bedStep++; const nx = startVoiceAt(w, end); if (nx) { stopVoice(v, end); voice = nx; } } }, Math.max(0, (end - now() - 1) * 1000));
   }
+  return v;
+}
+function startVoiceAt(w, when) { // следующий луп фона встык, без подъёма громкости
+  const key = BED[bedStep % BED.length], b = mbuf[key]; if (!b) return null;
+  const s = AC.createBufferSource(), g = AC.createGain();
+  s.buffer = b; s.connect(g).connect(musicBus); g.gain.value = w.gain * (NORM[key] || 1); s.start(when);
+  const v = { s, g, key: "bed", gain: w.gain };
+  v.timer = setTimeout(() => { if (voice === v) { bedStep++; const nx = startVoiceAt(w, when + b.duration); if (nx) { stopVoice(v, when + b.duration); voice = nx; } } }, Math.max(0, (when + b.duration - now() - 1) * 1000));
+  return v;
+}
+function stopVoice(v, at = now(), fade = 0.8) {
+  if (!v) return; clearTimeout(v.timer);
+  v.g.gain.cancelScheduledValues(at); v.g.gain.setTargetAtTime(0.0001, at, fade / 4);
+  try { v.s.stop(at + fade + 0.2); } catch (e) {}
 }
 function musicUpdate() {
-  const on = (buyOn && shopMusic) || radioOn;
-  if (on && !musicTimer) { nextT = now() + 0.1; musicTimer = setInterval(schedule, 100); }
-  if (!on && musicTimer) { clearInterval(musicTimer); musicTimer = null; }
-  musicBus.gain.cancelScheduledValues(now());
-  musicBus.gain.linearRampToValueAtTime(on ? 0.9 : 0, now() + 0.6);
+  if (!AC) return;
+  const w = want();
+  if (voice && w && voice.key === w.key) {
+    if (voice.gain !== w.gain) { voice.gain = w.gain; voice.g.gain.setTargetAtTime(w.gain * (NORM[voice.key] || 1), now(), 0.3); }
+  } else {
+    stopVoice(voice); voice = null;
+    if (w) voice = startVoice(w);
+  }
+  // техника играет громко — улица за окном почти не слышна; кратко приглушить фон (duck) тоже можно
+  if (ambBus) ambBus.gain.setTargetAtTime(VOL.amb * (device ? 0.35 : 1), now(), 0.4);
+  musicBus.gain.setTargetAtTime(now() * 1000 < duckUntil && !device ? 0.35 : 1, now(), 0.5);
 }
+// покупки открыты/закрыты
 export function buyMusic(on) { ac(); buyOn = on; musicUpdate(); }
-// музыка в покупках выключается отдельно от остальных звуков; радиола играет всё равно
-export const isShopMusic = () => shopMusic;
-export function toggleShopMusic() {
-  ac(); shopMusic = !shopMusic;
-  try { localStorage.setItem("shop-music", shopMusic ? "on" : "off"); } catch (e) {}
-  musicUpdate();
-  return shopMusic;
+// кнопка ♪ в пульте: вся фоновая музыка (фон и покупки); техника играет всё равно — её включили руками
+export const isMusic = () => musicOn;
+export function toggleMusic() {
+  ac(); musicOn = !musicOn;
+  try { localStorage.setItem("music", musicOn ? "on" : "off"); } catch (e) {}
+  musicUpdate(); return musicOn;
 }
-export function radio() { ac(); radioOn = !radioOn; if (radioOn) play("radio", { gain: 0.5, vary: 0 }); musicUpdate(); return radioOn; }
+// техника: радиола / музыкальный центр / аудиосистема. Играет одна; включил другую — первая замолкает
+export const playingDevice = () => device;
+export function deviceToggle(id) {
+  ac(); device = device === id ? null : id;
+  if (device === "radiola") play("radio", { gain: 0.5, vary: 0 });
+  musicUpdate(); return device === id;
+}
+export function deviceOff(id) { if (device === id) { device = null; musicUpdate(); } }
+// телевизор крупно — фон уходит, чтобы не мешать каналам (и будущему клипу)
+export function tvMode(on) { ac(); tvOn = on; musicUpdate(); }
+// приглушить музыку на несколько секунд (смотрим в окно — слышно улицу)
+export function duck(sec = 6) {
+  ac(); duckUntil = now() * 1000 + sec * 1000; musicUpdate();
+  setTimeout(musicUpdate, sec * 1000 + 50);
+}
+// отладка: что играет
+export const musicState = () => ({ voice: voice && voice.key, loaded: Object.keys(mbuf), device, buyOn, musicOn, ctx: AC && AC.state });
